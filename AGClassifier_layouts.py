@@ -34,7 +34,7 @@ iv_column_2_images = [
 
 ]
 
-# *******************************************************
+# *****************  ***********************
 
 # ***************** extra buttons ***********************
 extra_buttons_column = [
@@ -48,6 +48,35 @@ extra_buttons_column = [
     [
         sg.Button('Set this pop NA', pad=(0, 35), size=(16, 4)),
     ],
+]
+
+# Static top part of the layout
+top_layout = [
+    [
+        sg.Text("Page number of population:"),
+
+        sg.In(size=(25, 1), enable_events=True, key="-POPULATION-", pad=(0, 5)),
+        sg.Text("Sample No:"),
+        sg.In(size=(5, 1), enable_events=True, key="-SAMPLENO-", pad=(0, 5))
+    ],
+    [
+        sg.Text("OUTPUT INDEX FILE PREFIX:"),
+
+        sg.In(size=(25, 1), enable_events=True, key="-PREFIX-"),
+    ],
+    [
+        sg.Button('START', pad=(0, 25), size=(60, 4)),
+    ]
+]
+
+# Static bottom part of the layout
+bottom_layout = [
+    [
+        sg.Button('DONE, next image', size=(60, 4)),
+    ],
+    [
+        sg.Button('Previous image', size=(60, 4)),
+    ]
 ]
 
 
@@ -77,7 +106,6 @@ def layout_compositor(variable_layout, image_viewer_layout):
 
 
 def layoutSelector():
-    # Todo
     # GUI interface to select the layout
     # With an image preview of the various layouts ?
     # The variable parts of the layouts are stored as pickle files
@@ -92,7 +120,11 @@ def layoutSelector():
         variable_layout_dict = pickle.load(f)
 
         variable_layout = variable_layout_dict["variable_layout"]
+
+        composite_variable_layout = top_layout + variable_layout + bottom_layout
+
         number_of_images = variable_layout_dict["number_of_images"]
+        event_descriptor_dict = variable_layout_dict["event_descriptor_dict"]
 
         if number_of_images == 1:
             image_viewer_layout = iv_column_1_image
@@ -101,6 +133,6 @@ def layoutSelector():
         else:
             raise ValueError('Corrupted layout, number of images in the image viewer columns must be 1 or 2')
 
-    layout = layout_compositor(variable_layout, image_viewer_layout)
+    layout = layout_compositor(composite_variable_layout, image_viewer_layout)
 
-    return layout
+    return layout, event_descriptor_dict
