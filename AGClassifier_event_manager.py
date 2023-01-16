@@ -3,9 +3,9 @@
 
 import PySimpleGUI as sg
 
-from AGClassifier_utilities import createInvalidSelectWindow, createInvalidCustomWindow, \
-    createNoSamplePDF, createCompleteWindow, get_page, checkIfDiscarded, checkIfInIndexFiles, \
-    createPDFWindow, start_gating
+from AGClassifier_utilities import create_invalid_select_window, create_invalid_custom_window, \
+    create_no_sample_pdf, create_complete_window, get_page, check_if_discarded, check_if_in_index_files, \
+    create_pdf_window, start_gating
 
 
 def check_event_categories(event_list, event_descriptor_dict):
@@ -22,7 +22,7 @@ def check_event_categories(event_list, event_descriptor_dict):
             event_categories.append(event)
     event_categories = set(event_categories)
     if len(event_categories) < len(event_list):
-        createInvalidSelectWindow()
+        create_invalid_select_window()
         return False
     else:
         return True
@@ -98,10 +98,12 @@ def is_context_event(event):
     else:
         return False
 
+
 def initialise_parameters():
     # TODO
     # Initialise parameters
     return
+
 
 def event_loop(window, input_folder, output_folder, event_descriptor_dict):
     #
@@ -119,7 +121,7 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict):
         if is_context_event(event):
             # The open pdf event is a special case, it does not clear the event list
             if event == 'Open pdf':
-                if createPDFWindow():  # Returns True if pdf exists and is opened, False otherwise
+                if create_pdf_window():  # Returns True if pdf exists and is opened, False otherwise
                     continue
             else:
                 event_list = []

@@ -105,7 +105,7 @@ def layout_compositor(variable_layout, image_viewer_layout):
     return layout
 
 
-def layoutSelector():
+def layout_selector():
     # GUI interface to select the layout
     # With an image preview of the various layouts ?
     # The variable parts of the layouts are stored as pickle files
