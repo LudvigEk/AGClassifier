@@ -43,7 +43,6 @@ def limit_event_handler(event_list, output_folder, event_descriptor_dict):
     :param event_descriptor_dict:
     :return:
     """
-    print("I AM LIMIT EVENT HANDLER; I AM BEING CALLED")
     descriptor_list = []
     for event in event_list:
         if event in event_descriptor_dict.keys():
@@ -53,7 +52,7 @@ def limit_event_handler(event_list, output_folder, event_descriptor_dict):
         else:
             raise_str = "Event " + str(event) + " not found in event_descriptor_dict and is not a custom event"
             raise ValueError(raise_str)
-    add_to_output_yaml(output_folder, "test_name", descriptor_list, "test_value")
+    add_to_output_yaml(output_folder, "test_gate_name", descriptor_list, "test_value")
 
     return
 
