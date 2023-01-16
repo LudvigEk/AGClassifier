@@ -56,25 +56,6 @@ def context_event_handler(event_list, input_folder, output_folder):
     return
 
 
-def event_handler(event_list, input_folder, output_folder, event_descriptor_dict):
-    # TODO
-    # Handle events
-    # At this point the events are valid (check_event_categories has been run)
-    # Thus, we sort the event_list into limit and context events
-    # We call the context event handler first, then the limit event handler
-    # 'START', 'Done, next image', 'Previous image' and 'Exit' are handled in the event loop
-    context_events = []
-    limit_events = []
-    for event in event_list:
-        if event.split("_")[0] in ["DISCARD", "Set this pop NA", "Open pdf", ]:
-            context_events.append(event)
-        else:
-            limit_events.append(event)
-    context_event_handler(context_events, input_folder, output_folder)
-    limit_event_handler(limit_events, output_folder, event_descriptor_dict)
-    return
-
-
 def next_sample():
     # TODO
     # Get the next sample
