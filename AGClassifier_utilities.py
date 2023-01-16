@@ -245,10 +245,10 @@ def get_page(pno, dlist_tab, doc):
         pno = len(doc) - 1
     dlist = dlist_tab[pno]
     if not dlist:  # create if not yet there
-        dlist_tab[pno] = doc[pno].getDisplayList()
+        dlist_tab[pno] = doc[pno].get_displaylist()
         dlist = dlist_tab[pno]
-    pix = dlist.getPixmap(alpha=False)
-    return pix.getPNGData()
+    pix = dlist.get_pixmap(alpha=False)
+    return pix.tobytes("png")
 
 
 def check_if_discarded(image_index, file_list):
