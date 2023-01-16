@@ -348,6 +348,8 @@ def add_to_output_yaml(output_folder: str, gate_name: str, descriptors: list, sa
     # Read the output file, add the corrections to the appropriate sample, then write the file again.
     with open(output_folder + "/corrections.yaml", "r") as in_file:
         yaml_full_dict = yaml.safe_load(in_file)  # Dict of lists
+        if yaml_full_dict is None:
+            yaml_full_dict = {}
         # For each descriptor, if not already in yaml, add it. Otherwise, append to the list.
         if gate_name not in yaml_full_dict:
             yaml_full_dict[gate_name] = {}
