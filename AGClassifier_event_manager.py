@@ -58,9 +58,15 @@ def limit_event_handler(event_list, output_folder, event_descriptor_dict):
 
 
 def context_event_handler(event_list, input_folder, output_folder):
-    # TODO
-    # Handle static, contextual events
-    # These are events that are not defined in the event_descriptor_dict
+    """
+    Handle static, contextual events
+    These are events that are not defined in the event_descriptor_dict
+    :param event_list:
+    :param input_folder:
+    :param output_folder:
+    :return:
+    TODO
+    """
     for event in event_list:
         print(event)
     return

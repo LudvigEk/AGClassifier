@@ -135,7 +135,6 @@ def layout_selector():
         # page_no can be a tuple or a integer depending on 1 or 2+ number_of_images
         page_no = variable_layout_dict["page_no"]
 
-
         if number_of_images == 1:
             image_viewer_layout = iv_column_1_image
         elif number_of_images == 2:
