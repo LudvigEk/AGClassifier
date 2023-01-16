@@ -47,32 +47,33 @@ if __name__ == "__main__":
     # Only one event per category can be selected at a time, i.e. if the user selects
     # two Xlim_ events, a popup will appear telling them to select only one
     # multiple CUSTOM_ events can be selected at the same time
-    event_descriptor_dict = { "Ylim 100": "Ylim_100",
-                              "Ylim 150": "Ylim_150",
-                              "Ylim 200": "Ylim_200",
-                              "Ylim 300": "Ylim_300",
-                              "Xlim 200": "Xlim_200",
-                              "Xlim 300": "Xlim_300",
-                              "Xlim 400": "Xlim_400",
-                              "Xlim 700": "Xlim_700",
-                              "Custom 1": "CUSTOM_",
-                              "Custom 2": "CUSTOM_",
-                              "Custom 3": "CUSTOM_"
-                              }
+    event_descriptor_dict = {"Ylim 100": "Ylim_100",
+                             "Ylim 150": "Ylim_150",
+                             "Ylim 200": "Ylim_200",
+                             "Ylim 300": "Ylim_300",
+                             "Xlim 200": "Xlim_200",
+                             "Xlim 300": "Xlim_300",
+                             "Xlim 400": "Xlim_400",
+                             "Xlim 700": "Xlim_700",
+                             "Custom 1": "CUSTOM_",
+                             "Custom 2": "CUSTOM_",
+                             "Custom 3": "CUSTOM_"
+                             }
 
     # Make into a dict
     # Caveat 'page_no' can be a integer or a tuple
-    variable_layout_dict = {"number_of_images": 1, "page_no": 3, "variable_layout": variable_layout, "event_descriptor_dict": event_descriptor_dict}
+    variable_layout_dict = {"number_of_images": 2, "page_indicies": (3, 4), "variable_layout": variable_layout,
+                            "event_descriptor_dict": event_descriptor_dict}
 
     # pickle the dict to file
-    with open("../variable_layout_dict.pickle", "wb") as f:
+    with open("./variable_layout_dict.pickle", "wb") as f:
         pickle.dump(variable_layout_dict, f)
 
     # clear the dict
     variable_layout_dict = {}
 
     # Read the dict from file and print it to test
-    with open("../variable_layout_dict.pickle", "rb") as f:
+    with open("./variable_layout_dict.pickle", "rb") as f:
         variable_layout_dict = pickle.load(f)
         # print
         print(variable_layout_dict)

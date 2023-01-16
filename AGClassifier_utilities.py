@@ -49,8 +49,11 @@ def update_image(window_ref, image_index, file_list, page_no=0, b_forward_on_inv
         if isinstance(page_no, tuple):
             for elem in page_no:
                 if not isinstance(elem, int):
+
+                    print(elem)
                     raise TypeError("page_no must be an integer or a tuple of integers.")
-        raise TypeError("page_no must be an integer or a tuple of integers.")
+        else:
+            raise TypeError("page_no must be an integer or a tuple of integers.")
 
     # Validate image_index, if invalid, try next image (or previous depending on flag) until valid or end of list
     if b_forward_on_invalid:
@@ -100,6 +103,8 @@ def update_image(window_ref, image_index, file_list, page_no=0, b_forward_on_inv
         second_image_data = get_page(second_page, dlist_tab, doc)
         window_ref["-IMAGE2-"].update(data=second_image_data, size=(window_x_size, window_y_size))
 
+    # Refresh entire window
+    window_ref.refresh()
 
 def create_pdf_window(fname, ID):
     """

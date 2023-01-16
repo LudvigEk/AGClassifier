@@ -115,14 +115,16 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                 if create_pdf_window():  # Returns True if pdf exists and is opened, False otherwise
                     continue
             else:
-                event_list = []
                 if event in ["set to na", "discard"]:
+                    event_list = []
                     # These events should trigger a next sample call
                     update_image(window_ref=window, image_index=image_index, file_list=file_list, page_no=page_no)
                 elif event in ["previous"]:
+                    event_list = []
                     update_image(window_ref=window, image_index=image_index, file_list=file_list, page_no=page_no,
                                  b_forward_on_invalid=False)
                 elif event == "START":
+                    event_list = []
                     # Trigger update_image at sample X or from the beginning
                     update_image(window_ref=window, image_index=image_index, file_list=file_list, page_no=page_no)
                 elif event == "DONE, next image":
@@ -140,6 +142,7 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                         event_list = []
         else:
             # If the event is not a context event, add it to the event list
+            print(event)
             event_list.append(event)
 
     return
