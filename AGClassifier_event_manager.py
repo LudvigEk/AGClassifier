@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import PySimpleGUI as sg
+from glob import glob
 
 from AGClassifier_utilities import create_invalid_select_window, create_invalid_custom_window, \
     create_no_sample_pdf, create_complete_window, get_page, check_if_discarded, check_if_in_index_files, \
@@ -109,19 +110,13 @@ def is_context_event(event):
         return False
 
 
-def initialise_parameters():
-    # TODO
-    # Initialise parameters
-    return
-
-
-def event_loop(window, input_folder, output_folder, event_descriptor_dict):
+def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_no):
     #
     #
     #
     image_index = 0
     file_list = []
-    initialise_parameters()
+    file_list = glob(input_folder + "*.pdf") # initialise_parameters(event_descriptor_dict)
 
     # Initialise the event list with no elements
     event_list = []
@@ -142,7 +137,7 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict):
                     previous_sample()
                 else:
                     # Trigger start gating at sample X or from the beginning
-                    start_gating(window_ref=window, )  # TODO
+                    start_gating(window_ref=window, image_index=image_index, file_list=file_list, page_no=page_no)  # TODO
                     continue
 
         if not context_event_handler(event, event_list):

@@ -21,13 +21,13 @@ def main():
     input_folder, output_folder = select_folders()
 
     # Then select layout
-    layout, event_descriptor_dict = layout_selector()
+    layout, event_descriptor_dict, page_no = layout_selector()
 
     # Create the window
-    window = sg.Window("AliGater image classifier", layout)
+    window = sg.Window(title="AliGater image classifier", layout=layout)
 
     # Run the event loop
-    event_loop(window, input_folder, output_folder, event_descriptor_dict)
+    event_loop(window, input_folder, output_folder, event_descriptor_dict, page_no)
 
     window.close()
 
