@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import PySimpleGUI as sg
+import yaml
 from glob import glob
 
 from AGClassifier_utilities import create_invalid_select_window, create_invalid_custom_window, \
     create_no_sample_pdf, create_complete_window, get_page, check_if_discarded, check_if_in_index_files, \
-    create_pdf_window, start_gating
+    create_pdf_window, start_gating, add_to_output_yaml
 
 
 def check_event_categories(event_list, event_descriptor_dict):
@@ -37,23 +38,22 @@ def check_event_categories(event_list, event_descriptor_dict):
 def limit_event_handler(event_list, output_folder, event_descriptor_dict):
     """
     Check if event exists in the button_descriptor_dict. If not, raise an error
-    :param event_list:
-    :param output_folder:
+    :param event_list: List of all "limit events" (i.e. events that are not context events) that were clicked.
+    :param output_folder: The output folder where the output files will be saved. Defined by user on startup.
     :param event_descriptor_dict:
     :return:
     """
+    descriptor_list = []
     for event in event_list:
-        if event.split("_")[0] != "CUSTOM" and event in event_descriptor_dict.keys():
+        if event in event_descriptor_dict.keys():
             # If so, get the descriptor
-            descriptor = event_descriptor_dict[event]
-            # print it to the console
-            print("event descriptor: ", descriptor)
-        elif event.split("_")[0] == "CUSTOM":
-            # Just print the event to the console and continue
-            print("event descriptor: ", event)
+            descriptor_list.append(event_descriptor_dict[event])
+
         else:
             raise_str = "Event " + str(event) + " not found in event_descriptor_dict and is not a custom event"
             raise ValueError(raise_str)
+    add_to_output_yaml(output_folder, "test_name", descriptor_list, "test_value")
+
     return
 
 
