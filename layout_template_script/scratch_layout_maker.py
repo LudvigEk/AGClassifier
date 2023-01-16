@@ -66,14 +66,14 @@ if __name__ == "__main__":
                             "event_descriptor_dict": event_descriptor_dict}
 
     # pickle the dict to file
-    with open("./variable_layout_dict.pickle", "wb") as f:
+    with open("../variable_layout_dict.pickle", "wb") as f:
         pickle.dump(variable_layout_dict, f)
 
     # clear the dict
     variable_layout_dict = {}
 
     # Read the dict from file and print it to test
-    with open("./variable_layout_dict.pickle", "rb") as f:
+    with open("../variable_layout_dict.pickle", "rb") as f:
         variable_layout_dict = pickle.load(f)
         # print
         print(variable_layout_dict)
