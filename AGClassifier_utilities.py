@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import fitz
+import os
+import sys
+
 import PySimpleGUI as sg
-import sys, os, fitz
 
 
 # Wrong selection window
-def createInvalidSelectWindow():
+def create_invalid_select_window():
     reportStr = "Invalid selection, more than one in each category (xlim/ylim) is not allowed.\n"
     sys.stderr.write(reportStr)
     invalid_selection_layout = [
@@ -38,7 +41,7 @@ def start_gating(window_ref, image_index, file_list, page_no = 0):
         pass
 
     # image_index = 0 #image index already initialized and might have been set
-    while checkIfDiscarded(image_index, file_list):
+    while check_if_discarded(image_index, file_list):
         image_index += 1
 
     filename = os.path.join(
@@ -66,11 +69,11 @@ def start_gating(window_ref, image_index, file_list, page_no = 0):
     window_ref["-IMAGE-"].update(data=data, size=(320, 280))
 
     # Check if in any index:
-    sampleInIndexFiles = checkIfInIndexFiles(image_index, file_list)
+    sampleInIndexFiles = check_if_in_index_files(image_index, file_list)
     window_ref["-INDEX-"].update(sampleInIndexFiles)
 
 
-def createPDFWindow(fname, ID):
+def create_pdf_window(fname, ID):
     """
     Creates a window with a PDF of all images belonging to the same sample.
     :param fname: filename containing the PDF
@@ -83,7 +86,7 @@ def createPDFWindow(fname, ID):
     except FileNotFoundError:
         # Maybe print error?
         # Maybe done in the calling function?
-        createNoSamplePDF()
+        create_no_sample_pdf()
         return False
     page_count = len(doc)
     dlist_tab = [None] * page_count
@@ -145,7 +148,13 @@ def createPDFWindow(fname, ID):
     return True
 
 
-def createInvalidCustomWindow(label, value):
+def create_invalid_custom_window(label, value):
+    """
+
+    :param label:
+    :param value:
+    :return:
+    """
     reportStr = "Invalid custom " + str(label) + " limit, exepected integer (whole number), found: " + str(value)
     sys.stderr.write(reportStr)
     invalid_custom_limit_layout = [
@@ -161,7 +170,11 @@ def createInvalidCustomWindow(label, value):
     return
 
 
-def createNoSamplePDF():
+def create_no_sample_pdf():
+    """
+
+    :return:
+    """
     # TODO - specify expected filename/path of the missing pdf ?
     missing_file = [
         [
@@ -176,7 +189,7 @@ def createNoSamplePDF():
         return
 
 
-def createCompleteWindow():
+def create_complete_window():
     layout = [
         [
             sg.Text('All images in folders have been processed!'),
@@ -199,7 +212,7 @@ def get_page(pno, dlist_tab, doc):
     return pix.getPNGData()
 
 
-def checkIfDiscarded(image_index, file_list):
+def check_if_discarded(image_index, file_list):
     if image_index >= len(file_list):
         return False
     discard_list = []
@@ -222,7 +235,7 @@ def checkIfDiscarded(image_index, file_list):
         return False
 
 
-def checkIfInIndexFiles(image_index, file_list):
+def check_if_in_index_files(image_index, file_list):
     filename = os.path.join(
 
         values["-FOLDER-"], file_list[image_index]
@@ -253,67 +266,3 @@ def checkIfInIndexFiles(image_index, file_list):
         outStr = entry + " " + outStr
     return outStr
 
-
-def createPDFWindow(fname, ID):
-    try:
-        doc = fitz.open(fname)
-    except FileNotFoundError:
-        return False
-    page_count = len(doc)
-    dlist_tab = [None] * page_count
-    cur_page = 0
-    old_page = 0
-
-    data = get_page(cur_page, dlist_tab, doc)  # show page 1 for start
-    image_elem = sg.Image(data=data)
-    goto = sg.InputText(str(cur_page + 1), size=(5, 1))
-
-    layout = [
-        [
-            sg.Button('Prev'),
-            sg.Button('Next'),
-            sg.Text('Page:'),
-            goto,
-        ],
-        [image_elem],
-    ]
-    my_keys = ("Next", "Next:34", "Prev", "Prior:33", "MouseWheel:Down", "MouseWheel:Up")
-
-    window = sg.Window(ID, layout,
-                       return_keyboard_events=True, use_default_focus=False)
-
-    while True:
-        event, values = window.read(timeout=100)
-        force_page = False
-        if event == sg.WIN_CLOSED:
-            break
-        if event in ("Escape:27",):  # this spares me a 'Quit' button!
-            break
-        if event[0] == chr(13):  # surprise: this is 'Enter'!
-            try:
-                cur_page = int(values[0]) - 1  # check if valid
-                while cur_page < 0:
-                    cur_page += page_count
-            except IndexError:
-                cur_page = 0  # this guy's trying to fool me
-            goto.update(str(cur_page + 1))
-        elif event in ("Next", "Next:34", "MouseWheel:Down"):
-            cur_page += 1
-        elif event in ("Prev", "Prior:33", "MouseWheel:Up"):
-            cur_page -= 1
-
-        if cur_page >= page_count:  # wrap around
-            cur_page = 0
-        while cur_page < 0:  # we show conventional page numbers
-            cur_page += page_count
-        if event in my_keys or not values[0]:
-            goto.update(str(cur_page + 1))
-
-        if cur_page != old_page:
-            force_page = True
-        # Update
-        if force_page:
-            data = get_page(cur_page, dlist_tab, doc)
-            image_elem.update(data=data)
-            old_page = cur_page
-    return True
