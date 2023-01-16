@@ -349,7 +349,7 @@ def add_to_output_yaml(output_folder: str, gate_name: str, descriptors: list, sa
         if gate_name not in yaml_full_dict:
             yaml_full_dict[gate_name] = {}
         for descriptor in descriptors:
-            if descriptor not in yaml_full_dict[gate_name]:
+            if descriptor not in yaml_full_dict[gate_name].keys():
                 yaml_full_dict[gate_name][descriptor] = [sample_id]
             else:
                 yaml_full_dict[gate_name][descriptor].append(sample_id)
