@@ -4,7 +4,7 @@
 import fitz
 import os
 import sys
-
+import yaml
 import PySimpleGUI as sg
 
 
@@ -325,3 +325,31 @@ def check_if_in_index_files(image_index, file_list):
         outStr = entry + " " + outStr
     return outStr
 
+
+def add_to_output_yaml(output_folder: str, gate_name: str, descriptors: list, sample_id: str) -> None:
+    """
+    Add the corrections specified by the user to the yaml file specific to that gate.
+
+    :param output_folder: folder where the output yaml file is located
+    :param gate_name: Name of the gate the corrections apply to. It will be used to create the output file name.
+    :param descriptors: List of descriptors to be added/expanded upon in the output file.
+    :param sample_id: ID of the sample the corrections apply to.
+    :return:
+    """
+    # If output file does not exist, create it.
+    if not os.path.exists(output_folder + "/corrections.yaml"):
+        with open(output_folder + "/corrections.yaml", 'w') as f:
+            f.write("")
+    # Read the output file, add the corrections to the appropriate sample, then write the file again.
+    with open(output_folder + "/corrections.yaml", "r") as in_file:
+        yaml_full_dict = yaml.safe_load(in_file)  # Dict of lists
+        # For each descriptor, if not already in yaml, add it. Otherwise, append to the list.
+        if gate_name not in yaml_full_dict:
+            yaml_full_dict[gate_name] = {}
+        for descriptor in descriptors:
+            if descriptor not in yaml_full_dict[gate_name]:
+                yaml_full_dict[gate_name][descriptor] = [sample_id]
+            else:
+                yaml_full_dict[gate_name][descriptor].append(sample_id)
+    with open(output_folder + "/corrections.yaml", "w") as out_file:
+        yaml.safe_dump(yaml_full_dict, out_file)
