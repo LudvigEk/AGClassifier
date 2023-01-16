@@ -91,7 +91,7 @@ def previous_sample():
 
 
 def is_context_event(event):
-    if event in ["START", "Done, next image", "Previous image", "Exit", "Open pdf", "Set this pop NA", "Discard"]:
+    if event in ["START", "DONE, next image", "Previous image", "Exit", "Open pdf", "Set this pop NA", "Discard"]:
         return True
     else:
         return False
