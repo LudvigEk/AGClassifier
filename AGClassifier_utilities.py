@@ -49,8 +49,6 @@ def update_image(window_ref, image_index, file_list, page_no=0, b_forward_on_inv
         if isinstance(page_no, tuple):
             for elem in page_no:
                 if not isinstance(elem, int):
-
-                    print(elem)
                     raise TypeError("page_no must be an integer or a tuple of integers.")
         else:
             raise TypeError("page_no must be an integer or a tuple of integers.")
