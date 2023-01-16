@@ -24,8 +24,10 @@ def main():
     # Then select layout
     layout, event_descriptor_dict = layoutSelector()
 
+    print(layout)
+
     # Create the window
-    window = sg.Window("AliGater image classifier", layout)
+    window = sg.Window(title="AliGater image classifier", layout = layout)
 
     # Run the event loop
     event_loop(window, input_folder, output_folder, event_descriptor_dict)

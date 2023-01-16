@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import PySimpleGUI as sg
+from glob import glob
 
 from AGClassifier_utilities import createInvalidSelectWindow, createInvalidCustomWindow, \
     createNoSamplePDF, createCompleteWindow, get_page, checkIfDiscarded, checkIfInIndexFiles, \
@@ -98,18 +99,17 @@ def is_context_event(event):
     else:
         return False
 
-def initialise_parameters():
-    # TODO
-    # Initialise parameters
-    return
+
+def initialise_file_list(input_folder, event_descriptor_dict):
+    file_list = glob(input_folder + "/*.pdf")
+    n_of_images = event_descriptor_dict["number_of_images"]
 
 def event_loop(window, input_folder, output_folder, event_descriptor_dict):
-    #
-    #
-    #
     image_index = 0
-    file_list = []
-    initialise_parameters()
+    gated_samples = []
+    file_list = glob(input_folder + "/*.pdf")
+
+    file_list, page_no = initialise_file_list(input_folder, event_descriptor_dict)
 
     # Initialise the event list with no elements
     event_list = []
@@ -119,23 +119,8 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict):
         if is_context_event(event):
             # The open pdf event is a special case, it does not clear the event list
             if event == 'Open pdf':
-                if createPDFWindow():  # Returns True if pdf exists and is opened, False otherwise
-                    continue
-            else:
-                event_list = []
-                if event in ["set to na", "discard"]:
-                    # These events should trigger a next sample call
-                    next_sample()
-                elif event in ["previous"]:
-                    previous_sample()
-                else:
-                    # Trigger start gating at sample X or from the beginning
-                    start_gating(window_ref=window, )  # TODO
-                    continue
-
-        if not context_event_handler(event, event_list):
-            # If the event recieves
-            if event == "DONE, next image":
+                createPDFWindow()  # Returns True if pdf exists and is opened, False otherwise
+            elif event == "DONE, next image":
                 # First check that the event list is valid
                 # This spawns an invalid selection window if not
                 if check_event_categories(event_list, event_descriptor_dict):
@@ -143,11 +128,29 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict):
                     limit_event_handler(event_list, output_folder, event_descriptor_dict)
                     # then clear the event list and go to the next sample
                     event_list = []
-                    if not next_sample():
-                        break
+                    next_sample()
                 else:
-                    # Otherwise, clear the event list and keep going on the same sample
+                    # If check_event_categories returns False, the event list is invalid
+                    # Clear the event list and remain on the same sample
                     event_list = []
             else:
-                event_list.append(event)
+                # These other context events always clear the event list.
+                event_list = []
+                if event in ["set to na", "discard"]:
+                    # These events should trigger a next sample call
+                    next_sample()
+                elif event in ["previous"]:
+                    previous_sample()
+                elif event == "START":
+                    # Trigger start gating at sample X or from the beginning
+                    # window_ref, image_index, file_list, page_no = 0
+                    start_gating(window_ref=window, image_index=image_index, file_list=file_list, page_no=page_no)
+                    continue
+                else:
+                    # Raise unknown context event
+                    raise ValueError("Unknown context event: " + str(event))
+        else:
+            # If the event is not a context event, add it to the event list
+            event_list.append(event)
+
     return
