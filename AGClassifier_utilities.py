@@ -10,6 +10,10 @@ import PySimpleGUI as sg
 
 # Wrong selection window
 def create_invalid_select_window():
+    """
+    Warn the user that they have made an invalid selection by selecting more than one button of the same category.
+    :return:
+    """
     reportStr = "Invalid selection, more than one in each category (xlim/ylim) is not allowed.\n"
     sys.stderr.write(reportStr)
     invalid_selection_layout = [
@@ -28,9 +32,13 @@ def create_invalid_select_window():
     return
 
 
-def start_gating(window_ref, image_index, file_list, page_no = 0):
+def start_gating(window_ref, image_index, file_list, page_no=0):
     """
-    -
+    Commence the QC process or jump to the selected image.
+    :param window_ref: reference to the main window
+    :param image_index: index of the image to jump to
+    :param file_list: list of files to process
+    :param page_no: page number of the PDF to jump to. Default is 0.
     :return:
     """
     if not isinstance(page_no, int):
@@ -150,12 +158,12 @@ def create_pdf_window(fname, ID):
 
 def create_invalid_custom_window(label, value):
     """
-
+    Notify the user that the custom limit they entered for a custom button is invalid.
     :param label:
     :param value:
     :return:
     """
-    reportStr = "Invalid custom " + str(label) + " limit, exepected integer (whole number), found: " + str(value)
+    reportStr = "Invalid custom " + str(label) + " limit, expected integer (whole number), found: " + str(value)
     sys.stderr.write(reportStr)
     invalid_custom_limit_layout = [
         [
@@ -172,7 +180,7 @@ def create_invalid_custom_window(label, value):
 
 def create_no_sample_pdf():
     """
-
+    Notify the user that the sample they selected does not have a corresponding PDF.
     :return:
     """
     # TODO - specify expected filename/path of the missing pdf ?
@@ -190,6 +198,10 @@ def create_no_sample_pdf():
 
 
 def create_complete_window():
+    """
+    Popup window to notify user that all samples have been processed.
+    :return: PySimpleGUI window
+    """
     layout = [
         [
             sg.Text('All images in folders have been processed!'),
@@ -200,6 +212,13 @@ def create_complete_window():
 
 
 def get_page(pno, dlist_tab, doc):
+    """
+
+    :param pno: Page number
+    :param dlist_tab:
+    :param doc:
+    :return:
+    """
     reportStr = "doclength: " + str(len(doc)) + " pageno: " + str(pno)
     print(reportStr)
     if len(doc) <= pno:
@@ -213,6 +232,12 @@ def get_page(pno, dlist_tab, doc):
 
 
 def check_if_discarded(image_index, file_list):
+    """
+    Check if the sample is in the discarded list.
+    :param image_index:
+    :param file_list:
+    :return:
+    """
     if image_index >= len(file_list):
         return False
     discard_list = []
@@ -236,6 +261,12 @@ def check_if_discarded(image_index, file_list):
 
 
 def check_if_in_index_files(image_index, file_list):
+    """
+    Check if the sample is in the file list.
+    :param image_index:
+    :param file_list:
+    :return:
+    """
     filename = os.path.join(
 
         values["-FOLDER-"], file_list[image_index]
