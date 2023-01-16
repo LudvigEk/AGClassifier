@@ -10,6 +10,10 @@ from AGClassifier_event_manager import event_loop
 
 
 def select_folders():
+    """
+    Initial popups to select input and output folders
+    :return: input_folder, output_folder
+    """
     input_folder = sg.popup_get_folder("Select input folder")
     output_folder = sg.popup_get_folder("Select output folder")
 
@@ -17,6 +21,11 @@ def select_folders():
 
 
 def main():
+    """
+    Main function
+    :return:
+    """
+
     # First select input and output folders
     input_folder, output_folder = select_folders()
 

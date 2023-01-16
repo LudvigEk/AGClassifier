@@ -10,14 +10,19 @@ from AGClassifier_utilities import create_invalid_select_window, create_invalid_
 
 
 def check_event_categories(event_list, event_descriptor_dict):
-    # Check that only one event of each category is present
-    # Custom_ events are an exception to this rule
-    # Custom_ events can be selected multiple times
+    """
+    Check that only one event of each category is present
+    Custom_ events are an exception to this rule
+    Custom_ events can be selected multiple times
+    :param event_list:
+    :param event_descriptor_dict:
+    :return:
+    """
     event_categories = []
     for event in event_list:
         if "_" in event:
             event_category = event_descriptor_dict[event].split("_")[0]
-            if event_category is not "CUSTOM_":
+            if event_category != "CUSTOM_":
                 event_categories.append(event_category)
         else:
             event_categories.append(event)
@@ -30,8 +35,13 @@ def check_event_categories(event_list, event_descriptor_dict):
 
 
 def limit_event_handler(event_list, output_folder, event_descriptor_dict):
-    # Check if event exists in the button_descriptor_dict
-    # If not, raise
+    """
+    Check if event exists in the button_descriptor_dict. If not, raise an error
+    :param event_list:
+    :param output_folder:
+    :param event_descriptor_dict:
+    :return:
+    """
     for event in event_list:
         if event.split("_")[0] != "CUSTOM" and event in event_descriptor_dict.keys():
             # If so, get the descriptor
@@ -48,9 +58,15 @@ def limit_event_handler(event_list, output_folder, event_descriptor_dict):
 
 
 def context_event_handler(event_list, input_folder, output_folder):
-    # TODO
-    # Handle static, contextual events
-    # These are events that are not defined in the event_descriptor_dict
+    """
+    Handle static, contextual events
+    These are events that are not defined in the event_descriptor_dict
+    :param event_list:
+    :param input_folder:
+    :param output_folder:
+    :return:
+    TODO
+    """
     for event in event_list:
         print(event)
     return

@@ -83,8 +83,12 @@ bottom_layout = [
 # ***********************************************************
 
 def layout_compositor(variable_layout, image_viewer_layout):
-    # Compose the layout from the variable parts
-    # and the fixed parts
+    """
+    Compose the layout from the variable part and the fixed parts
+    :param variable_layout:
+    :param image_viewer_layout:
+    :return:
+    """
     layout = [
 
         [
@@ -106,9 +110,11 @@ def layout_compositor(variable_layout, image_viewer_layout):
 
 
 def layout_selector():
-    # GUI interface to select the layout
-    # With an image preview of the various layouts ?
-    # The variable parts of the layouts are stored as pickle files
+    """
+    GUI interface to select the layout. With an image preview of the various layouts ?
+    The variable parts of the layouts are stored as pickle files
+    :return:
+    """
 
     # Select pickle file
     layout_pickle_file = sg.popup_get_file("Select layout pickle file",
@@ -128,7 +134,6 @@ def layout_selector():
 
         # page_no can be a tuple or a integer depending on 1 or 2+ number_of_images
         page_no = variable_layout_dict["page_no"]
-
 
         if number_of_images == 1:
             image_viewer_layout = iv_column_1_image
