@@ -22,7 +22,7 @@ def check_event_categories(event_list, event_descriptor_dict):
     for event in event_list:
         if "_" in event:
             event_category = event_descriptor_dict[event].split("_")[0]
-            if event_category is not "CUSTOM_":
+            if event_category != "CUSTOM_":
                 event_categories.append(event_category)
         else:
             event_categories.append(event)
