@@ -92,7 +92,8 @@ def previous_sample():
 
 
 def is_context_event(event):
-    if event in ["START", "DONE, next image", "Previous image", "Exit", "Open pdf", "Set this pop NA", "Discard"]:
+    if event in ["START", "DONE, next image", "Previous image", "Exit", "WIN_CLOSED",
+                 "Open pdf", "Set this pop NA", "Discard", "-SAMPLENO-"]:
         return True
     else:
         return False
@@ -101,7 +102,7 @@ def is_context_event(event):
 def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_no):
     # TODO handle image_index events
     image_index = 0
-    file_list = glob(input_folder + "/*.pdf") # initialise_parameters(event_descriptor_dict)
+    file_list = glob(input_folder + "/*.pdf")  # initialise_parameters(event_descriptor_dict)
     if len(file_list) == 0:
         raise
 
@@ -115,6 +116,22 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
             if event == 'Open pdf':
                 if create_pdf_window():  # Returns True if pdf exists and is opened, False otherwise
                     continue
+            elif event == "-SAMPLENO-":
+                # if the input sampleno is a integer and in-bounds of the file list, update the image_index
+                # save old image index first, then try to convert the input to an integer
+                # if its also valid, replace image_index with this new value, otherwise use the old value
+                old_image_index = image_index
+                try:
+                    image_index = int(values["-SAMPLENO-"])
+                except ValueError:
+                    image_index = old_image_index
+                else:
+                    if image_index < 0 or image_index >= len(file_list):
+                        # Out of bounds, use old value
+                        image_index = old_image_index
+                        values["-SAMPLENO-"] = image_index
+            elif event == "Exit" or event == "WIN_CLOSED":
+                break
             else:
                 if event in ["set to na", "discard"]:
                     event_list = []
@@ -143,7 +160,6 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                         event_list = []
         else:
             # If the event is not a context event, add it to the event list
-            print(event)
             event_list.append(event)
 
     return
