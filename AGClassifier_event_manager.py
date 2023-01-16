@@ -43,6 +43,7 @@ def limit_event_handler(event_list, output_folder, event_descriptor_dict):
     :param event_descriptor_dict:
     :return:
     """
+    print("I AM LIMIT EVENT HANDLER; I AM BEING CALLED")
     descriptor_list = []
     for event in event_list:
         if event in event_descriptor_dict.keys():
