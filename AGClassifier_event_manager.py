@@ -6,7 +6,7 @@ from glob import glob
 
 from AGClassifier_utilities import create_invalid_select_window, create_invalid_custom_window, \
     create_no_sample_pdf, create_complete_window, get_page, check_if_discarded, check_if_in_index_files, \
-    create_pdf_window, start_gating
+    create_pdf_window, update_image
 
 
 def check_event_categories(event_list, event_descriptor_dict):
@@ -98,12 +98,11 @@ def is_context_event(event):
 
 
 def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_no):
-    #
-    #
-    #
+    # TODO handle image_index events
     image_index = 0
-    file_list = []
-    file_list = glob(input_folder + "*.pdf") # initialise_parameters(event_descriptor_dict)
+    file_list = glob(input_folder + "/*.pdf") # initialise_parameters(event_descriptor_dict)
+    if len(file_list) == 0:
+        raise
 
     # Initialise the event list with no elements
     event_list = []
@@ -119,29 +118,28 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                 event_list = []
                 if event in ["set to na", "discard"]:
                     # These events should trigger a next sample call
-                    next_sample()
+                    update_image(window_ref=window, image_index=image_index, file_list=file_list, page_no=page_no)
                 elif event in ["previous"]:
-                    previous_sample()
-                else:
-                    # Trigger start gating at sample X or from the beginning
-                    start_gating(window_ref=window, image_index=image_index, file_list=file_list, page_no=page_no)  # TODO
-                    continue
+                    update_image(window_ref=window, image_index=image_index, file_list=file_list, page_no=page_no,
+                                 b_forward_on_invalid=False)
+                elif event == "START":
+                    # Trigger update_image at sample X or from the beginning
+                    update_image(window_ref=window, image_index=image_index, file_list=file_list, page_no=page_no)
+                elif event == "DONE, next image":
+                    # First check that the event list is valid
+                    # This spawns an invalid selection window if not
+                    if check_event_categories(event_list, event_descriptor_dict):
+                        # If so, run the event handler
+                        limit_event_handler(event_list, output_folder, event_descriptor_dict)
+                        # then clear the event list and go to the next sample
+                        event_list = []
+                        if not next_sample():
+                            break
+                    else:
+                        # Otherwise, clear the event list and keep going on the same sample
+                        event_list = []
+        else:
+            # If the event is not a context event, add it to the event list
+            event_list.append(event)
 
-        if not context_event_handler(event, event_list):
-            # If the event recieves
-            if event == "DONE, next image":
-                # First check that the event list is valid
-                # This spawns an invalid selection window if not
-                if check_event_categories(event_list, event_descriptor_dict):
-                    # If so, run the event handler
-                    limit_event_handler(event_list, output_folder, event_descriptor_dict)
-                    # then clear the event list and go to the next sample
-                    event_list = []
-                    if not next_sample():
-                        break
-                else:
-                    # Otherwise, clear the event list and keep going on the same sample
-                    event_list = []
-            else:
-                event_list.append(event)
     return

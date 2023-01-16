@@ -32,53 +32,73 @@ def create_invalid_select_window():
     return
 
 
-def start_gating(window_ref, image_index, file_list, page_no=0):
+def update_image(window_ref, image_index, file_list, page_no=0, b_forward_on_invalid=True):
     """
     Commence the QC process or jump to the selected image.
     :param window_ref: reference to the main window
     :param image_index: index of the image to jump to
     :param file_list: list of files to process
-    :param page_no: page number of the PDF to jump to. Default is 0.
+    :param page_no: page number of the PDF to jump to. Default is 0. This can be a tuple of page numbers.
+    :param b_forward_on_invalid: if True, the program will jump to the next image if the selected image is invalid,
+    otherwise it will jump to the previous image. Default is True.
     :return:
     """
+
+    # Validate page_no format
     if not isinstance(page_no, int):
-        warnMSG = "Page number is not an integer, defaulting to 0"
-        sys.stderr.write(warnMSG)
-        # TODO - create warning window
-        page_no = 0
-        pass
+        if isinstance(page_no, tuple):
+            for elem in page_no:
+                if not isinstance(elem, int):
+                    raise TypeError("page_no must be an integer or a tuple of integers.")
+        raise TypeError("page_no must be an integer or a tuple of integers.")
 
-    # image_index = 0 #image index already initialized and might have been set
+    # Validate image_index, if invalid, try next image (or previous depending on flag) until valid or end of list
+    if b_forward_on_invalid:
+        image_increment = 1
+    else:
+        image_increment = -1
     while check_if_discarded(image_index, file_list):
-        image_index += 1
+        image_index += image_increment
 
-    filename = os.path.join(
 
-        window_ref["-FOLDER-"], file_list[image_index]
+    # Load found valid image
+    filename = file_list[image_index]
 
-    )
+    cleaned_name = os.path.basename(filename).replace(".pdf", "")
 
-    cleaned_name = cleaned_name = os.path.basename(filename).replace(".pdf",
-                                                                     "")  # filename.split("/")[-1].replace(".pdf", "")
     window_ref["-TOUT-"].update(cleaned_name)
     countStr = str(image_index) + "/" + str(len(file_list))
     window_ref["-COUNT-"].update(countStr)
+
     # Open image X from pdf
     try:
         doc = fitz.open(filename)
     except FileNotFoundError:
-        raise
+        raise FileNotFoundError("File not found: " + filename)
+
     page_count = len(doc)
     dlist_tab = [None] * page_count
-    cur_page = page_no
+    if isinstance(page_no, int):
+        cur_page = page_no
+        window_x_size = 320
+        window_y_size = 280
+    else:
+        cur_page = page_no[0]
+        window_x_size = 160
+        window_y_size = 140
 
     data = get_page(cur_page, dlist_tab, doc)  # show page 1 for start
-
-    window_ref["-IMAGE-"].update(data=data, size=(320, 280))
+    window_ref["-IMAGE-"].update(data=data, size=(window_x_size, window_y_size))
 
     # Check if in any index:
     sampleInIndexFiles = check_if_in_index_files(image_index, file_list)
     window_ref["-INDEX-"].update(sampleInIndexFiles)
+
+    # If image_index is a tuple, then load/update the second image
+    if isinstance(image_index, tuple):
+        second_page = page_no[1]
+        second_image_data = get_page(second_page, dlist_tab, doc)
+        window_ref["-IMAGE2-"].update(data=second_image_data, size=(window_x_size, window_y_size))
 
 
 def create_pdf_window(fname, ID):
@@ -240,6 +260,10 @@ def check_if_discarded(image_index, file_list):
     """
     if image_index >= len(file_list):
         return False
+
+    # TODO update this once the .yaml format is updated. For now just accept all samples.
+    return False
+
     discard_list = []
     discard_file = values["-OUT_FOLDER-"] + "/discard.txt"
 
@@ -267,6 +291,10 @@ def check_if_in_index_files(image_index, file_list):
     :param file_list:
     :return:
     """
+
+    # TODO update this once the .yaml format is updated. For now just accept all samples.
+    return ""
+
     filename = os.path.join(
 
         values["-FOLDER-"], file_list[image_index]
