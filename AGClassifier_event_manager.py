@@ -35,7 +35,7 @@ def check_event_categories(event_list, event_descriptor_dict):
         return True
 
 
-def limit_event_handler(event_list, output_folder, event_descriptor_dict):
+def limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_name):
     """
     Check if event exists in the button_descriptor_dict. If not, raise an error
     :param event_list: List of all "limit events" (i.e. events that are not context events) that were clicked.
@@ -97,8 +97,12 @@ def is_context_event(event):
     else:
         return False
 
+def collect_name_from_pdf():
+    # TODO
+    # Collect the name from the pdf
+    return "test_name"
 
-def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_no):
+def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_no, gate_name):
     # TODO handle image_index events
     image_index = 0
     file_list = glob(input_folder + "/*.pdf")  # initialise_parameters(event_descriptor_dict)
@@ -149,7 +153,7 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                     # This spawns an invalid selection window if not
                     if check_event_categories(event_list, event_descriptor_dict):
                         # If so, run the event handler
-                        limit_event_handler(event_list, output_folder, event_descriptor_dict)
+                        limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_name)
                         # then clear the event list and go to the next sample
                         event_list = []
                         if not next_sample():
