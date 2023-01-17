@@ -14,6 +14,7 @@ def select_folders():
     Initial popups to select input and output folders
     :return: input_folder, output_folder
     """
+    # TODO error/invalid handling
     input_folder = sg.popup_get_folder("Select input folder")
     output_folder = sg.popup_get_folder("Select output folder")
 

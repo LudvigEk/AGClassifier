@@ -72,22 +72,27 @@ def context_event_handler(event_list, input_folder, output_folder):
     return
 
 
-def next_sample():
+def next_sample(window_ref, image_index, file_list, page_no):
     # TODO
     # Get the next sample
     # If there is no next sample, create a complete window and return False
     # If the next sample is discarded or already analysed, skip it and go to the next one
     # If the next sample is not discarded or analysed, display it and return True
-    return True
+    image_index = update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
+
+    return image_index
 
 
-def previous_sample():
+def previous_sample(window_ref, image_index, file_list, page_no):
     # TODO
     # Get the previous sample
     # If there is no previous sample, do nothing
     # If the previous sample is discarded, skip it and go to the previous one
     # Until a non-discarded sample is found or there are no more samples, in which case do nothing
-    return True
+    image_index = update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no,
+                               b_forward_on_invalid=False)
+
+    return image_index
 
 
 def is_context_event(event):
@@ -139,15 +144,18 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                 if event in ["set to na", "discard"]:
                     event_list = []
                     # These events should trigger a next sample call
-                    update_image(window_ref=window, image_index=image_index, file_list=file_list, page_no=page_no)
+                    # next_sample(window_ref, image_index, file_list, page_no)
+                    image_index = next_sample(window_ref=window, image_index=image_index,
+                                              file_list=file_list, page_no=page_no)
                 elif event in ["previous"]:
                     event_list = []
-                    update_image(window_ref=window, image_index=image_index, file_list=file_list, page_no=page_no,
-                                 b_forward_on_invalid=False)
+                    image_index = previous_sample(window_ref=window, image_index=image_index,
+                                                  file_list=file_list, page_no=page_no)
                 elif event == "START":
                     event_list = []
                     # Trigger update_image at sample X or from the beginning
-                    update_image(window_ref=window, image_index=image_index, file_list=file_list, page_no=page_no)
+                    image_index = next_sample(window_ref=window, image_index=image_index,
+                                              file_list=file_list, page_no=page_no)
                 elif event == "DONE, next image":
                     # First check that the event list is valid
                     # This spawns an invalid selection window if not
@@ -156,8 +164,8 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                         limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_name)
                         # then clear the event list and go to the next sample
                         event_list = []
-                        if not next_sample():
-                            break
+                        image_index = next_sample(window_ref=window, image_index=image_index,
+                                                  file_list=file_list, page_no=page_no)
                     else:
                         # Otherwise, clear the event list and keep going on the same sample
                         event_list = []
