@@ -34,16 +34,19 @@ def check_event_categories(event_list, event_descriptor_dict):
         return True
 
 
-def limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_name, sample_name) -> None:
+def limit_event_handler(event_list: list, output_folder: str, event_descriptor_dict: dict, gate_name: str,
+                        sample_name: str) -> None:
     """
-    Deal with the so called 'limit events'.
+    Deal with the so called 'limit events'. Update the output yaml file with by adding the name of the current sample
+    under the selected descriptors.
     Check if event exists in the button_descriptor_dict. If not, raise an error.
 
     :param event_list: List of all "limit events" (i.e. events that are not context events) that were clicked.
     :param output_folder: The output folder where the output files will be saved. Defined by user on startup.
-    :param event_descriptor_dict:
-    :param gate_name:
-    :return:
+    :param event_descriptor_dict: Maps the event/button names to the descriptors. Taken from the .pickle file.
+    :param gate_name: Name of the gate. Taken from the .pickle file.
+    :param sample_name: Name of the current sample. Taken from the PDF file name.
+    :return: None
     """
 
     descriptor_list = []
@@ -127,13 +130,12 @@ def next_sample(window_ref, image_index: int, file_list: list, page_no: int):
 
 
 def previous_sample(window_ref, image_index, file_list, page_no):
-    # TODO
+    # TODO: implement this function
     # Get the previous sample
     # If there is no previous sample, do nothing
     # If the previous sample is discarded, skip it and go to the previous one
     # Until a non-discarded sample is found or there are no more samples, in which case do nothing
-    image_index = update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no,
-                               b_forward_on_invalid=False)
+    image_index = update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
 
     return image_index
 
@@ -159,12 +161,12 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
     TODO handle image_index events
     TODO "-SAMPLENO-" events do not work properly if an incorrect index is entered by the user
 
-    :param window:
-    :param input_folder:
-    :param output_folder:
-    :param event_descriptor_dict:
-    :param page_no:
-    :param gate_name:
+    :param window: PySimpleGUI window
+    :param input_folder: The input folder where the PDF files are located. Defined by user on startup.
+    :param output_folder: The output folder where the output files will be saved. Defined by user on startup.
+    :param event_descriptor_dict: Maps the event/button names to the descriptors. Taken from the .pickle file.
+    :param page_no: The page number of the PDF file that will be displayed.
+    :param gate_name: Name of the gate being QC'd. Taken from the .pickle file.
     :return: None
     """
 
@@ -176,11 +178,14 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
     # Initialise the event list with no elements
     event_list = []
     while True:
-        event, values = window.read()
+        # A few debug prints. TODO: Remove these when done
+        print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
         print("Image index: ", image_index)
         sample_name = collect_name_of_pdf_at_index(file_list, image_index)
+        print(f"Sample name corresponding to that index is {sample_name}")
+
+        event, values = window.read()
         print(f"E: {event}, V: {values}")
-        print(f"Current sample name is {sample_name}")
         # First check for context events (start, exit, previous, discard, set to na, open pdf)
         if is_context_event(event):
             # The open pdf event is a special case, it does not clear the event list
