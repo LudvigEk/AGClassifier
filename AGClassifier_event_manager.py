@@ -12,10 +12,12 @@ def check_event_categories(event_list, event_descriptor_dict):
     Check that only one event of each category is present
     Custom_ events are an exception to this rule
     Custom_ events can be selected multiple times
+
     :param event_list:
     :param event_descriptor_dict:
     :return:
     """
+
     event_categories = []
     for event in event_list:
         if "_" in event:
@@ -32,15 +34,18 @@ def check_event_categories(event_list, event_descriptor_dict):
         return True
 
 
-def limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_name, sample_name):
+def limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_name, sample_name) -> None:
     """
-    Check if event exists in the button_descriptor_dict. If not, raise an error
+    Deal with the so called 'limit events'.
+    Check if event exists in the button_descriptor_dict. If not, raise an error.
+
     :param event_list: List of all "limit events" (i.e. events that are not context events) that were clicked.
     :param output_folder: The output folder where the output files will be saved. Defined by user on startup.
     :param event_descriptor_dict:
     :param gate_name:
     :return:
     """
+
     descriptor_list = []
     for event in event_list:
         if event in event_descriptor_dict.keys():
@@ -59,12 +64,14 @@ def context_event_handler(event_list, input_folder, output_folder):
     """
     Handle static, contextual events
     These are events that are not defined in the event_descriptor_dict
+    TODO: Function is empty
+
     :param event_list:
     :param input_folder:
     :param output_folder:
     :return:
-    TODO
     """
+
     for event in event_list:
         print(event)
     return
@@ -75,13 +82,13 @@ def start_analysis(window_ref, image_index=0, file_list=[], page_no=0):
     Start the analysis from the defined image index. Default is 0.
     If the specified sample is discarded or already analysed, skip it and go to the next one.
     If the specified sample is NOT discarded or analysed, display it and return the index.
+
     :param window_ref:
     :param image_index:
     :param file_list:
     :param page_no:
     :return:
     """
-    # TODO
 
     if not isinstance(file_list, list) or not file_list:
         raise ValueError("No file list provided")
@@ -96,6 +103,7 @@ def next_sample(window_ref, image_index: int, file_list: list, page_no: int):
     """
     Go to the next sample. If the next sample is discarded, skip it and go to the next one instead. If the index is out
     of bounds, it means we have reached the last sample and we are done.
+
     :param window_ref:
     :param image_index:
     :param file_list:
@@ -132,10 +140,12 @@ def previous_sample(window_ref, image_index, file_list, page_no):
 
 def is_context_event(event) -> bool:
     """
-    Check if the event is a context event
+    Check if the event is a context event.
+
     :param event: PySimpleGUI event
     :return: True if the event is a context event, False otherwise
     """
+
     if event in ["START", "DONE, next image", "Previous image", "Exit", "WIN_CLOSED",
                  "Open pdf", "Set this pop NA", "Discard", "-SAMPLENO-"]:
         return True
@@ -157,6 +167,7 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
     :param gate_name:
     :return: None
     """
+
     image_index = 0
     file_list = glob(input_folder + "/*.pdf")  # initialise_parameters(event_descriptor_dict)
     if len(file_list) == 0 or file_list is None:

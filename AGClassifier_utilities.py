@@ -12,8 +12,11 @@ import PySimpleGUI as sg
 def create_invalid_select_window():
     """
     Warn the user that they have made an invalid selection by selecting more than one button of the same category.
+    TODO: there seems to be a bug where this only fires once?
+
     :return:
     """
+
     reportStr = "Invalid selection, more than one in each category (xlim/ylim) is not allowed.\n"
     sys.stderr.write(reportStr)
     invalid_selection_layout = [
@@ -35,6 +38,7 @@ def create_invalid_select_window():
 def update_image(window_ref, image_index, file_list, page_no=0) -> int:
     """
     Commence the QC process or jump to the selected image.
+
     :param window_ref: reference to the main window
     :param image_index: index of the image to jump to
     :param file_list: list of files to process
@@ -103,11 +107,12 @@ def update_image(window_ref, image_index, file_list, page_no=0) -> int:
 def create_pdf_window(fname: str, ID) -> bool:
     """
     Creates a window with a PDF of all images belonging to the same sample.
+
     :param fname: filename of the PDF
     :param ID: sample ID
-    :return:
+    :return: False if an error happened, True otherwise
     """
-    #
+
     try:
         doc = fitz.open(fname)
     except FileNotFoundError:
@@ -178,10 +183,12 @@ def create_pdf_window(fname: str, ID) -> bool:
 def create_invalid_custom_window(label, value):
     """
     Notify the user that the custom limit they entered for a custom button is invalid.
+
     :param label:
     :param value:
     :return:
     """
+
     reportStr = "Invalid custom " + str(label) + " limit, expected integer (whole number), found: " + str(value)
     sys.stderr.write(reportStr)
     invalid_custom_limit_layout = [
@@ -200,8 +207,10 @@ def create_invalid_custom_window(label, value):
 def create_no_sample_pdf():
     """
     Notify the user that the sample they selected does not have a corresponding PDF.
+
     :return:
     """
+
     # TODO - specify expected filename/path of the missing pdf ?
     missing_file = [
         [
@@ -219,9 +228,11 @@ def create_no_sample_pdf():
 def create_complete_window():
     """
     Popup window to notify user that all samples have been processed.
-    :return: PySimpleGUI window
     TODO: This should not return a window reference, it should collect and handle user events
+
+    :return: PySimpleGUI window
     """
+
     layout = [
         [
             sg.Text('All images in folders have been processed!'),
@@ -233,12 +244,14 @@ def create_complete_window():
 
 def get_page(pno, dlist_tab, doc):
     """
+    Get specific page of the document using pix.
 
     :param pno: Page number
     :param dlist_tab:
     :param doc:
     :return:
     """
+
     reportStr = "doclength: " + str(len(doc)) + " pageno: " + str(pno)
     print(reportStr)
     if len(doc) <= pno:
@@ -254,10 +267,12 @@ def get_page(pno, dlist_tab, doc):
 def check_if_discarded(image_index: int, file_list: list) -> bool:
     """
     Check if the sample is in the discarded list.
+
     :param image_index: index of the sample in the file list
     :param file_list: list of all samples that have been discarded
     :return:
     """
+
     if image_index is None:
         print("WARNING: image_index is None")
         return False
@@ -291,12 +306,13 @@ def check_if_discarded(image_index: int, file_list: list) -> bool:
 def check_if_in_index_files(image_index, file_list):
     """
     Check if the sample is in the file list.
+    TODO: Not currently implemented. Update this once the .yaml format is updated. For now just accept all samples.
+
     :param image_index:
     :param file_list:
     :return:
     """
 
-    # TODO update this once the .yaml format is updated. For now just accept all samples.
     return ""
 
     filename = os.path.join(
@@ -333,6 +349,7 @@ def check_if_in_index_files(image_index, file_list):
 def add_to_output_yaml(output_folder: str, gate_name: str, descriptors: list, sample_id: str) -> None:
     """
     Add the corrections specified by the user to the yaml file specific to that gate.
+    TODO: make sure the entries for each descriptor are unique. A sample can only be added once to each.
 
     :param output_folder: folder where the output yaml file is located
     :param gate_name: Name of the gate the corrections apply to. It will be used to create the output file name.
@@ -340,6 +357,7 @@ def add_to_output_yaml(output_folder: str, gate_name: str, descriptors: list, sa
     :param sample_id: ID of the sample the corrections apply to.
     :return:
     """
+
     # If output file does not exist, create it.
     if not os.path.exists(output_folder + "/corrections.yaml"):
         with open(output_folder + "/corrections.yaml", 'w') as f:
@@ -364,10 +382,12 @@ def add_to_output_yaml(output_folder: str, gate_name: str, descriptors: list, sa
 def collect_name_of_pdf_at_index(pdf_list: list, image_id: int) -> str:
     """
     Collect the name of the sample from the pdf file name.
+
     :param pdf_list: list of pdf files
     :param image_id: index of the sample in the list
     :return: Name of the PDF file without the extension
     """
+
     filename = pdf_list[image_id].split("/")[-1]
     cleaned_name = filename.replace(".pdf", "")
 
