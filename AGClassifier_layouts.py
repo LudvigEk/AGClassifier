@@ -135,6 +135,8 @@ def layout_selector():
         # page_no can be a tuple or a integer depending on 1 or 2+ number_of_images
         page_no = variable_layout_dict["page_indicies"]
 
+        gate_name = variable_layout_dict["gate_name"]
+
         if number_of_images == 1:
             image_viewer_layout = iv_column_1_image
         elif number_of_images == 2:
@@ -144,4 +146,4 @@ def layout_selector():
 
     layout = layout_compositor(composite_variable_layout, image_viewer_layout)
 
-    return layout, event_descriptor_dict, page_no
+    return layout, event_descriptor_dict, page_no, gate_name

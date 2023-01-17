@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
     # Make into a dict
     # Caveat 'page_no' can be a integer or a tuple
-    variable_layout_dict = {"number_of_images": 2, "page_indicies": (3, 4), "variable_layout": variable_layout,
+    variable_layout_dict = {"gate name": "test gate", "number_of_images": 2, "page_indicies": (3, 4), "variable_layout": variable_layout,
                             "event_descriptor_dict": event_descriptor_dict}
 
     # pickle the dict to file
