@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+import sys
 from glob import glob
 
 from AGClassifier_utilities import create_invalid_select_window, create_pdf_window, update_image, add_to_output_yaml, \
-    collect_name_of_pdf_at_index
+    collect_name_of_pdf_at_index, check_if_discarded, create_complete_window
 
 
 def check_event_categories(event_list, event_descriptor_dict):
@@ -70,9 +70,11 @@ def context_event_handler(event_list, input_folder, output_folder):
     return
 
 
-def next_sample(window_ref, image_index, file_list, page_no):
+def start_analysis(window_ref, image_index=0, file_list=[], page_no=0):
     """
-    Simple wrapper for 'update_image' that increments the image index
+    Start the analysis from the defined image index. Default is 0.
+    If the specified sample is discarded or already analysed, skip it and go to the next one.
+    If the specified sample is NOT discarded or analysed, display it and return the index.
     :param window_ref:
     :param image_index:
     :param file_list:
@@ -80,12 +82,38 @@ def next_sample(window_ref, image_index, file_list, page_no):
     :return:
     """
     # TODO
-    # Get the next sample
-    # If there is no next sample, create a complete window and return False
-    # If the next sample is discarded or already analysed, skip it and go to the next one
-    # If the next sample is not discarded or analysed, display it and return True
-    index_plus_one = image_index + 1
-    image_index = update_image(window_ref=window_ref, image_index=index_plus_one, file_list=file_list, page_no=page_no)
+
+    if not isinstance(file_list, list) or not file_list:
+        raise ValueError("No file list provided")
+    if check_if_discarded(image_index, file_list):  # If the first sample is discarded, go to the next one
+        image_index = next_sample(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
+    image_index = update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
+
+    return image_index
+
+
+def next_sample(window_ref, image_index: int, file_list: list, page_no: int):
+    """
+    Go to the next sample. If the next sample is discarded, skip it and go to the next one instead. If the index is out
+    of bounds, it means we have reached the last sample and we are done.
+    :param window_ref:
+    :param image_index:
+    :param file_list:
+    :param page_no:
+    :return: int if a valid sample is found, False if there are no more samples
+    """
+
+    image_index = image_index + 1
+
+    # Validate image_index, if invalid, try next image until valid or end of list
+    while check_if_discarded(image_index, file_list):  # Skip discarded samples
+        image_index += 1
+
+    # Check if new_index is out of scope. If so return False to finish
+    if image_index >= len(file_list):
+        create_complete_window()  # All samples have been analysed
+        return False
+    image_index = update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
 
     return image_index
 
@@ -102,7 +130,12 @@ def previous_sample(window_ref, image_index, file_list, page_no):
     return image_index
 
 
-def is_context_event(event):
+def is_context_event(event) -> bool:
+    """
+    Check if the event is a context event
+    :param event: PySimpleGUI event
+    :return: True if the event is a context event, False otherwise
+    """
     if event in ["START", "DONE, next image", "Previous image", "Exit", "WIN_CLOSED",
                  "Open pdf", "Set this pop NA", "Discard", "-SAMPLENO-"]:
         return True
@@ -110,8 +143,20 @@ def is_context_event(event):
         return False
 
 
-def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_no, gate_name):
-    # TODO handle image_index events
+def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_no, gate_name) -> None:
+    """
+    The event loop. This is the main function of the program.
+    TODO handle image_index events
+    TODO "-SAMPLENO-" events do not work properly if an incorrect index is entered by the user
+
+    :param window:
+    :param input_folder:
+    :param output_folder:
+    :param event_descriptor_dict:
+    :param page_no:
+    :param gate_name:
+    :return: None
+    """
     image_index = 0
     file_list = glob(input_folder + "/*.pdf")  # initialise_parameters(event_descriptor_dict)
     if len(file_list) == 0 or file_list is None:
@@ -121,7 +166,6 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
     event_list = []
     while True:
         event, values = window.read()
-        print("File list: ", file_list)
         print("Image index: ", image_index)
         sample_name = collect_name_of_pdf_at_index(file_list, image_index)
         print(f"E: {event}, V: {values}")
@@ -145,17 +189,19 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                 except ValueError:
                     image_index = old_image_index
                 else:
-                    image_index = old_image_index
                     values["-SAMPLENO-"] = image_index
             elif event == "Exit" or event == "WIN_CLOSED":
                 break
             else:
                 if event in ["Set this pop NA", "DISCARD"]:
+                    # TODO: include a popup that makes sure the user wants to discard the sample
                     event_list = []
                     # These events should trigger a next sample call
                     # next_sample(window_ref, image_index, file_list, page_no)
                     image_index = next_sample(window_ref=window, image_index=image_index,
                                               file_list=file_list, page_no=page_no)
+                    if image_index is False:  # Win condition achieved
+                        break
                 elif event in ["previous"]:
                     event_list = []
                     image_index = previous_sample(window_ref=window, image_index=image_index,
@@ -163,8 +209,8 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                 elif event == "START":
                     event_list = []
                     # Trigger update_image at sample X or from the beginning
-                    image_index = update_image(window_ref=window, image_index=image_index,
-                                               file_list=file_list, page_no=page_no)
+                    image_index = start_analysis(window_ref=window, image_index=image_index,
+                                                 file_list=file_list, page_no=page_no)
                 elif event == "DONE, next image":
                     # First check that the event list is valid
                     # This spawns an invalid selection window if not

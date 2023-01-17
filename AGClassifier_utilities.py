@@ -32,7 +32,7 @@ def create_invalid_select_window():
     return
 
 
-def update_image(window_ref, image_index, file_list, page_no=0, b_forward_on_invalid=True) -> int:
+def update_image(window_ref, image_index, file_list, page_no=0) -> int:
     """
     Commence the QC process or jump to the selected image.
     :param window_ref: reference to the main window
@@ -53,13 +53,7 @@ def update_image(window_ref, image_index, file_list, page_no=0, b_forward_on_inv
         else:
             raise TypeError("page_no must be an integer or a tuple of integers.")
 
-    # Validate image_index, if invalid, try next image (or previous depending on flag) until valid or end of list
-    if b_forward_on_invalid:
-        image_increment = 1
-    else:
-        image_increment = -1
-    while check_if_discarded(image_index, file_list):
-        image_index += image_increment
+
 
     # Load found valid image
     filename = file_list[image_index]
@@ -226,6 +220,7 @@ def create_complete_window():
     """
     Popup window to notify user that all samples have been processed.
     :return: PySimpleGUI window
+    TODO: This should not return a window reference, it should collect and handle user events
     """
     layout = [
         [
