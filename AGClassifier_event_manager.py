@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import PySimpleGUI as sg
-import yaml
 from glob import glob
 
-from AGClassifier_utilities import create_invalid_select_window, create_invalid_custom_window, \
-    create_no_sample_pdf, create_complete_window, get_page, check_if_discarded, check_if_in_index_files, \
-    create_pdf_window, update_image, add_to_output_yaml
+from AGClassifier_utilities import create_invalid_select_window, create_pdf_window, update_image, add_to_output_yaml, \
+    collect_name_of_pdf_at_index
 
 
 def check_event_categories(event_list, event_descriptor_dict):
@@ -35,12 +32,13 @@ def check_event_categories(event_list, event_descriptor_dict):
         return True
 
 
-def limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_name):
+def limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_name, sample_name):
     """
     Check if event exists in the button_descriptor_dict. If not, raise an error
     :param event_list: List of all "limit events" (i.e. events that are not context events) that were clicked.
     :param output_folder: The output folder where the output files will be saved. Defined by user on startup.
     :param event_descriptor_dict:
+    :param gate_name:
     :return:
     """
     descriptor_list = []
@@ -52,7 +50,7 @@ def limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_n
         else:
             raise_str = "Event " + str(event) + " not found in event_descriptor_dict and is not a custom event"
             raise ValueError(raise_str)
-    add_to_output_yaml(output_folder, "test_gate_name", descriptor_list, "test_value")
+    add_to_output_yaml(output_folder, gate_name, descriptor_list, sample_name)
 
     return
 
@@ -73,12 +71,21 @@ def context_event_handler(event_list, input_folder, output_folder):
 
 
 def next_sample(window_ref, image_index, file_list, page_no):
+    """
+    Simple wrapper for 'update_image' that increments the image index
+    :param window_ref:
+    :param image_index:
+    :param file_list:
+    :param page_no:
+    :return:
+    """
     # TODO
     # Get the next sample
     # If there is no next sample, create a complete window and return False
     # If the next sample is discarded or already analysed, skip it and go to the next one
     # If the next sample is not discarded or analysed, display it and return True
-    image_index = update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
+    index_plus_one = image_index + 1
+    image_index = update_image(window_ref=window_ref, image_index=index_plus_one, file_list=file_list, page_no=page_no)
 
     return image_index
 
@@ -102,22 +109,23 @@ def is_context_event(event):
     else:
         return False
 
-def collect_name_from_pdf():
-    # TODO
-    # Collect the name from the pdf
-    return "test_name"
 
 def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_no, gate_name):
     # TODO handle image_index events
     image_index = 0
     file_list = glob(input_folder + "/*.pdf")  # initialise_parameters(event_descriptor_dict)
-    if len(file_list) == 0:
-        raise
+    if len(file_list) == 0 or file_list is None:
+        raise ValueError("No pdf files found in input folder")
 
     # Initialise the event list with no elements
     event_list = []
     while True:
         event, values = window.read()
+        print("File list: ", file_list)
+        print("Image index: ", image_index)
+        sample_name = collect_name_of_pdf_at_index(file_list, image_index)
+        print(f"E: {event}, V: {values}")
+        print(f"Current sample name is {sample_name}")
         # First check for context events (start, exit, previous, discard, set to na, open pdf)
         if is_context_event(event):
             # The open pdf event is a special case, it does not clear the event list
@@ -131,17 +139,18 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                 old_image_index = image_index
                 try:
                     image_index = int(values["-SAMPLENO-"])
+                    # None, negative values, out of bounds values are all invalid. Use old value instead.
+                    if image_index is None or image_index < 0 or image_index >= len(file_list):
+                        raise ValueError
                 except ValueError:
                     image_index = old_image_index
                 else:
-                    if image_index < 0 or image_index >= len(file_list):
-                        # Out of bounds, use old value
-                        image_index = old_image_index
-                        values["-SAMPLENO-"] = image_index
+                    image_index = old_image_index
+                    values["-SAMPLENO-"] = image_index
             elif event == "Exit" or event == "WIN_CLOSED":
                 break
             else:
-                if event in ["set to na", "discard"]:
+                if event in ["Set this pop NA", "DISCARD"]:
                     event_list = []
                     # These events should trigger a next sample call
                     # next_sample(window_ref, image_index, file_list, page_no)
@@ -154,14 +163,14 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                 elif event == "START":
                     event_list = []
                     # Trigger update_image at sample X or from the beginning
-                    image_index = next_sample(window_ref=window, image_index=image_index,
-                                              file_list=file_list, page_no=page_no)
+                    image_index = update_image(window_ref=window, image_index=image_index,
+                                               file_list=file_list, page_no=page_no)
                 elif event == "DONE, next image":
                     # First check that the event list is valid
                     # This spawns an invalid selection window if not
                     if check_event_categories(event_list, event_descriptor_dict):
                         # If so, run the event handler
-                        limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_name)
+                        limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_name, sample_name)
                         # then clear the event list and go to the next sample
                         event_list = []
                         image_index = next_sample(window_ref=window, image_index=image_index,

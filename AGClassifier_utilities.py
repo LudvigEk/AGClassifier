@@ -32,7 +32,7 @@ def create_invalid_select_window():
     return
 
 
-def update_image(window_ref, image_index, file_list, page_no=0, b_forward_on_invalid=True):
+def update_image(window_ref, image_index, file_list, page_no=0, b_forward_on_invalid=True) -> int:
     """
     Commence the QC process or jump to the selected image.
     :param window_ref: reference to the main window
@@ -41,7 +41,7 @@ def update_image(window_ref, image_index, file_list, page_no=0, b_forward_on_inv
     :param page_no: page number of the PDF to jump to. Default is 0. This can be a tuple of page numbers.
     :param b_forward_on_invalid: if True, the program will jump to the next image if the selected image is invalid,
     otherwise it will jump to the previous image. Default is True.
-    :return:
+    :return: Updated image index
     """
 
     # Validate page_no format
@@ -60,7 +60,6 @@ def update_image(window_ref, image_index, file_list, page_no=0, b_forward_on_inv
         image_increment = -1
     while check_if_discarded(image_index, file_list):
         image_index += image_increment
-
 
     # Load found valid image
     filename = file_list[image_index]
@@ -81,12 +80,12 @@ def update_image(window_ref, image_index, file_list, page_no=0, b_forward_on_inv
     dlist_tab = [None] * page_count
     if isinstance(page_no, int):
         cur_page = page_no
-        window_x_size = 320
-        window_y_size = 280
+        window_x_size = 960
+        window_y_size = 840
     else:
         cur_page = page_no[0]
-        window_x_size = 160
-        window_y_size = 140
+        window_x_size = 480
+        window_y_size = 420
 
     data = get_page(cur_page, dlist_tab, doc)  # show page 1 for start
     window_ref["-IMAGE-"].update(data=data, size=(window_x_size, window_y_size))
@@ -104,10 +103,13 @@ def update_image(window_ref, image_index, file_list, page_no=0, b_forward_on_inv
     # Refresh entire window
     window_ref.refresh()
 
-def create_pdf_window(fname, ID):
+    return image_index
+
+
+def create_pdf_window(fname: str, ID) -> bool:
     """
     Creates a window with a PDF of all images belonging to the same sample.
-    :param fname: filename containing the PDF
+    :param fname: filename of the PDF
     :param ID: sample ID
     :return:
     """
@@ -254,13 +256,17 @@ def get_page(pno, dlist_tab, doc):
     return pix.tobytes("png")
 
 
-def check_if_discarded(image_index, file_list):
+def check_if_discarded(image_index: int, file_list: list) -> bool:
     """
     Check if the sample is in the discarded list.
-    :param image_index:
-    :param file_list:
+    :param image_index: index of the sample in the file list
+    :param file_list: list of all samples that have been discarded
     :return:
     """
+    if image_index is None:
+        print("WARNING: image_index is None")
+        return False
+
     if image_index >= len(file_list):
         return False
 
@@ -358,3 +364,16 @@ def add_to_output_yaml(output_folder: str, gate_name: str, descriptors: list, sa
                 yaml_full_dict[gate_name][descriptor].append(sample_id)
     with open(output_folder + "/corrections.yaml", "w") as out_file:
         yaml.safe_dump(yaml_full_dict, out_file)
+
+
+def collect_name_of_pdf_at_index(pdf_list: list, image_id: int) -> str:
+    """
+    Collect the name of the sample from the pdf file name.
+    :param pdf_list: list of pdf files
+    :param image_id: index of the sample in the list
+    :return: Name of the PDF file without the extension
+    """
+    filename = pdf_list[image_id].split("/")[-1]
+    cleaned_name = filename.replace(".pdf", "")
+
+    return cleaned_name
