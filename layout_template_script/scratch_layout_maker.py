@@ -62,18 +62,18 @@ if __name__ == "__main__":
 
     # Make into a dict
     # Caveat 'page_no' can be a integer or a tuple
-    variable_layout_dict = {"gate name": "test gate", "number_of_images": 2, "page_indicies": (3, 4), "variable_layout": variable_layout,
+    variable_layout_dict = {"gate_name": "test gate", "number_of_images": 2, "page_indicies": (3, 4), "variable_layout": variable_layout,
                             "event_descriptor_dict": event_descriptor_dict}
 
     # pickle the dict to file
-    with open("./variable_layout_dict.pickle", "wb") as f:
+    with open("../variable_layout_dict.pickle", "wb") as f:
         pickle.dump(variable_layout_dict, f)
 
     # clear the dict
     variable_layout_dict = {}
 
     # Read the dict from file and print it to test
-    with open("./variable_layout_dict.pickle", "rb") as f:
+    with open("../variable_layout_dict.pickle", "rb") as f:
         variable_layout_dict = pickle.load(f)
         # print
         print(variable_layout_dict)
