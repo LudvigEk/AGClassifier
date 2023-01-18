@@ -37,14 +37,13 @@ def create_invalid_select_window():
 
 def update_image(window_ref, image_index, file_list, page_no=0) -> int:
     """
-    Commence the QC process or jump to the selected image.
+    Update the image being shown in the PySimpleGUI window. Replace the current image with the image at the page
+    'page_no' of the file specified in 'file_list'['image_index'].
 
     :param window_ref: reference to the main window
-    :param image_index: index of the image to jump to
-    :param file_list: list of files to process
+    :param image_index: index of the PDF file name we want to jump to in the file list
+    :param file_list: list of all PDF files to process
     :param page_no: page number of the PDF to jump to. Default is 0. This can be a tuple of page numbers.
-    :param b_forward_on_invalid: if True, the program will jump to the next image if the selected image is invalid,
-    otherwise it will jump to the previous image. Default is True.
     :return: Updated image index
     """
 
@@ -56,8 +55,6 @@ def update_image(window_ref, image_index, file_list, page_no=0) -> int:
                     raise TypeError("page_no must be an integer or a tuple of integers.")
         else:
             raise TypeError("page_no must be an integer or a tuple of integers.")
-
-
 
     # Load found valid image
     filename = file_list[image_index]
@@ -78,12 +75,10 @@ def update_image(window_ref, image_index, file_list, page_no=0) -> int:
     dlist_tab = [None] * page_count
     if isinstance(page_no, int):
         cur_page = page_no
-        window_x_size = 960
-        window_y_size = 840
     else:
-        cur_page = page_no[0]
-        window_x_size = 480
-        window_y_size = 420
+        cur_page = page_no[0]  # TODO: would it be bad to enforce page_no to be an int?
+    window_x_size = 960
+    window_y_size = 840
 
     data = get_page(cur_page, dlist_tab, doc)  # show page 1 for start
     window_ref["-IMAGE-"].update(data=data, size=(window_x_size, window_y_size))
