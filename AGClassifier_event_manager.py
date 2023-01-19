@@ -7,7 +7,7 @@ from AGClassifier_utilities import create_invalid_select_window, create_pdf_wind
     collect_name_of_pdf_at_index, check_if_discarded, create_complete_window
 
 
-def check_event_categories(event_list, event_descriptor_dict):
+def check_event_categories(event_list, event_descriptor_dict) -> bool:
     """
     Check that only one event of each category is present
     Custom_ events are an exception to this rule
@@ -54,7 +54,6 @@ def limit_event_handler(event_list: list, output_folder: str, event_descriptor_d
         if event in event_descriptor_dict.keys():
             # If so, get the descriptor
             descriptor_list.append(event_descriptor_dict[event])
-
         else:
             raise_str = "Event " + str(event) + " not found in event_descriptor_dict and is not a custom event"
             raise ValueError(raise_str)
@@ -152,7 +151,6 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
     :param gate_name: Name of the gate being QC'd. Taken from the .pickle file.
     :return: None
     """
-
     image_index = 0
     file_list = glob(input_folder + "/*.pdf")  # initialise_parameters(event_descriptor_dict)
     if len(file_list) == 0 or file_list is None:
