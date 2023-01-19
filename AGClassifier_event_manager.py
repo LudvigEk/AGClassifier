@@ -205,16 +205,12 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                                                   file_list=file_list, page_no=page_no)
                 elif event == "START":
                     event_list = []
-                    #Image_index before start_analyis
-                    print("Image index before start_analysis: ", image_index)
+                    window["-CORRECTIONS-"].update(value=' '.join(event_list))  # Display the event list in the GUI
                     # Trigger update_image at sample X or from the beginning
                     image_index = start_analysis(window_ref=window, image_index=image_index,
                                                  file_list=file_list, page_no=page_no)
-                    # We pritn image_index
-                    print("Image index after start_analysis: ", image_index)
                 elif event == "DONE, next image":
-                    # First check that the event list is valid
-                    # This spawns an invalid selection window if not
+                    # First check that the event list is valid. This spawns an invalid selection window if not
                     if check_event_categories(event_list, event_descriptor_dict):
                         # If so, run the event handler
                         limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_name, sample_name)
@@ -225,8 +221,10 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                     else:
                         # Otherwise, clear the event list and keep going on the same sample
                         event_list = []
+                    window["-CORRECTIONS-"].update(value=' '.join(event_list))  # Display the event list in the GUI
         else:
             # If the event is not a context event, add it to the event list
             event_list.append(event)
+            window["-CORRECTIONS-"].update(value=' '.join(event_list))  # Display the event list in the GUI
 
     return

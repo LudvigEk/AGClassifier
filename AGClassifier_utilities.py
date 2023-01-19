@@ -346,7 +346,7 @@ def check_if_in_index_files(image_index, file_list):
 def add_to_output_yaml(output_folder: str, gate_name: str, descriptors: list, sample_id: str) -> None:
     """
     Add the corrections specified by the user to the yaml file specific to that gate.
-    TODO: make sure the entries for each descriptor are unique. A sample can only be added once to each.
+    TODO: Fix duplicated sample IDs. Entries on each descriptor should be unique.
 
     :param output_folder: folder where the output yaml file is located
     :param gate_name: Name of the gate the corrections apply to. It will be used to create the output file name.
@@ -371,7 +371,9 @@ def add_to_output_yaml(output_folder: str, gate_name: str, descriptors: list, sa
             if descriptor not in yaml_full_dict[gate_name].keys():
                 yaml_full_dict[gate_name][descriptor] = [sample_id]
             else:
-                yaml_full_dict[gate_name][descriptor].append(sample_id)
+                if sample_id not in yaml_full_dict[gate_name][descriptor]:
+                    yaml_full_dict[gate_name][descriptor].append(sample_id)
+                yaml_full_dict[gate_name][descriptor].sort()  # TODO: natural sorting instead?
     with open(output_folder + "/corrections.yaml", "w") as out_file:
         yaml.safe_dump(yaml_full_dict, out_file)
 

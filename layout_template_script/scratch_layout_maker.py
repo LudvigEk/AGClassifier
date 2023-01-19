@@ -4,6 +4,10 @@ import PySimpleGUI as sg
 
 variable_layout = [
     [
+        sg.Text("Currently selected corrections are: "),
+        sg.Text("", key="-CORRECTIONS-"),
+    ],
+    [
 
         sg.Button('Xlim 200', size=(8, 4)),
         sg.Button('Xlim 300', size=(8, 4)),
