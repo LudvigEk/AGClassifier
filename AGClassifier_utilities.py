@@ -58,7 +58,6 @@ def update_image(window_ref, image_index, file_list, page_no=0) -> int:
 
     # Load found valid image
     filename = file_list[image_index]
-
     cleaned_name = os.path.basename(filename).replace(".pdf", "")
 
     window_ref["-TOUT-"].update(cleaned_name)
@@ -374,16 +373,16 @@ def add_to_output_yaml(output_folder: str, gate_name: str, descriptors: list, sa
         yaml.safe_dump(yaml_full_dict, out_file)
 
 
-def collect_name_of_pdf_at_index(pdf_list: list, image_id: int) -> str:
+def collect_name_of_pdf_at_index(pdf_list: list, image_index: int) -> str:
     """
     Collect the name of the sample from the pdf file name.
 
     :param pdf_list: list of pdf files
-    :param image_id: index of the sample in the list
+    :param image_index: index of the sample in the list
     :return: Name of the PDF file without the extension
     """
 
-    filename = pdf_list[image_id].split("/")[-1]
-    cleaned_name = filename.replace(".pdf", "")
+    filename = pdf_list[image_index]
+    cleaned_name = os.path.basename(filename).replace(".pdf", "")
 
     return cleaned_name
