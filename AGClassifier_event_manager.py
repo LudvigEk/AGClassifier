@@ -4,7 +4,7 @@ import sys
 from glob import glob
 
 from AGClassifier_utilities import create_invalid_select_window, create_pdf_window, update_image, add_to_output_yaml, \
-    collect_name_of_pdf_at_index, check_if_discarded, create_complete_window, check_if_in_yaml
+    collect_name_of_pdf_at_index, check_if_discarded, create_complete_window, check_if_in_yaml, remove_from_yaml
 
 
 def check_event_categories(event_list, event_descriptor_dict) -> bool:
@@ -164,7 +164,8 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
         print("Image index: ", image_index)
         sample_name = collect_name_of_pdf_at_index(file_list, image_index)
         print(f"Sample name corresponding to that index is {sample_name}")
-        if check_if_in_yaml(sample_name, output_folder, gate_name):
+        sample_in_yaml = check_if_in_yaml(sample_name, output_folder, gate_name)  # Flag used to 'correct' if new limits
+        if sample_in_yaml:
             print(f"Sample {sample_name} was already analysed at this gate!")  # TODO: this should be a real warning
         event, values = window.read()
         print(f"E: {event}, V: {values}")
@@ -213,6 +214,8 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                 elif event == "DONE, next image":
                     # First check that the event list is valid. This spawns an invalid selection window if not
                     if check_event_categories(event_list, event_descriptor_dict):
+                        if sample_in_yaml and event_list:  # If sample was already in the yaml and new limits were given
+                            remove_from_yaml(sample_name, output_folder, gate_name)
                         # If so, run the event handler
                         limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_name, sample_name)
                         # then clear the event list and go to the next sample

@@ -415,3 +415,23 @@ def check_if_in_yaml(sample_name: str, output_folder: str, gate_name: str) -> bo
     else:
         return False  # If the file does not exist, the sample is not in it.
 
+
+def remove_from_yaml(sample_name: str, output_folder: str, gate_name: str) -> None:
+    """
+    Remove all appearances of the sample name at the specified gate from yaml file.
+
+    :param sample_name: Name of the sample to be removed.
+    :param output_folder: Folder where the output yaml file is located.
+    :param gate_name: Name of the gate the corrections apply to.
+    :return: None
+    """
+
+    if os.path.exists(output_folder + "/corrections.yaml"):
+        with open(output_folder + "/corrections.yaml", "r") as in_file:
+            yaml_full_dict = yaml.safe_load(in_file)
+            if (yaml_full_dict is not None) and (gate_name in yaml_full_dict):
+                for descriptor in yaml_full_dict[gate_name]:
+                    if sample_name in yaml_full_dict[gate_name][descriptor]:
+                        yaml_full_dict[gate_name][descriptor].remove(sample_name)
+        with open(output_folder + "/corrections.yaml", "w") as out_file:
+            yaml.safe_dump(yaml_full_dict, out_file)
