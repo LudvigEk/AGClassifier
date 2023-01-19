@@ -63,23 +63,6 @@ def limit_event_handler(event_list: list, output_folder: str, event_descriptor_d
     return
 
 
-def context_event_handler(event_list, input_folder, output_folder):
-    """
-    Handle static, contextual events
-    These are events that are not defined in the event_descriptor_dict
-    TODO: Function is empty
-
-    :param event_list:
-    :param input_folder:
-    :param output_folder:
-    :return:
-    """
-
-    for event in event_list:
-        print(event)
-    return
-
-
 def start_analysis(window_ref, image_index=0, file_list=[], page_no=0):
     """
     Start the analysis from the defined image index. Default is 0.
@@ -199,13 +182,13 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                 old_image_index = image_index
                 try:
                     image_index = int(values["-SAMPLENO-"])
-                    # None, negative values, out of bounds values are all invalid. Use old value instead.
-                    if image_index is None or image_index < 0 or image_index >= len(file_list):
-                        raise ValueError
                 except ValueError:
                     image_index = old_image_index
                 else:
-                    values["-SAMPLENO-"] = image_index
+                    if image_index < 0 or image_index >= len(file_list):
+                        # Out of bounds, use old value
+                        image_index = old_image_index
+                        values["-SAMPLENO-"] = image_index
             elif event == "Exit" or event == "WIN_CLOSED":
                 break
             else:

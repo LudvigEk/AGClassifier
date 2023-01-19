@@ -72,12 +72,17 @@ def update_image(window_ref, image_index, file_list, page_no=0) -> int:
 
     page_count = len(doc)
     dlist_tab = [None] * page_count
+    # Page no can either be single int, if a single image is shown
+    # but tuple of ints if 2 images are shown
+    # Resolution should be different
+    window_x_size = 960
+    window_y_size = 840
     if isinstance(page_no, int):
         cur_page = page_no
     else:
-        cur_page = page_no[0]  # TODO: would it be bad to enforce page_no to be an int?
-    window_x_size = 960
-    window_y_size = 840
+        window_x_size = window_x_size/2
+        window_y_size = window_y_size/2
+        cur_page = page_no[0]
 
     data = get_page(cur_page, dlist_tab, doc)  # show page 1 for start
     window_ref["-IMAGE-"].update(data=data, size=(window_x_size, window_y_size))
