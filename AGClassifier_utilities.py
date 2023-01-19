@@ -12,11 +12,8 @@ import PySimpleGUI as sg
 def create_invalid_select_window():
     """
     Warn the user that they have made an invalid selection by selecting more than one button of the same category.
-    TODO: there seems to be a bug where this only fires once?
-
     :return:
     """
-
     reportStr = "Invalid selection, more than one in each category (xlim/ylim) is not allowed.\n"
     sys.stderr.write(reportStr)
     invalid_selection_layout = [
@@ -73,12 +70,17 @@ def update_image(window_ref, image_index, file_list, page_no=0) -> int:
 
     page_count = len(doc)
     dlist_tab = [None] * page_count
+    # Page no can either be single int, if a single image is shown
+    # but tuple of ints if 2 images are shown
+    # Resolution should be different
+    window_x_size = 960
+    window_y_size = 840
     if isinstance(page_no, int):
         cur_page = page_no
     else:
-        cur_page = page_no[0]  # TODO: would it be bad to enforce page_no to be an int?
-    window_x_size = 960
-    window_y_size = 840
+        window_x_size = window_x_size/2
+        window_y_size = window_y_size/2
+        cur_page = page_no[0]
 
     data = get_page(cur_page, dlist_tab, doc)  # show page 1 for start
     window_ref["-IMAGE-"].update(data=data, size=(window_x_size, window_y_size))
@@ -308,6 +310,7 @@ def check_if_in_index_files(image_index, file_list):
     :return:
     """
 
+    # TODO update this once the .yaml format is updated. For now just accept all samples.
     return ""
 
     filename = os.path.join(
@@ -372,18 +375,3 @@ def add_to_output_yaml(output_folder: str, gate_name: str, descriptors: list, sa
                 yaml_full_dict[gate_name][descriptor].append(sample_id)
     with open(output_folder + "/corrections.yaml", "w") as out_file:
         yaml.safe_dump(yaml_full_dict, out_file)
-
-
-def collect_name_of_pdf_at_index(pdf_list: list, image_id: int) -> str:
-    """
-    Collect the name of the sample from the pdf file name.
-
-    :param pdf_list: list of pdf files
-    :param image_id: index of the sample in the list
-    :return: Name of the PDF file without the extension
-    """
-
-    filename = pdf_list[image_id].split("/")[-1]
-    cleaned_name = filename.replace(".pdf", "")
-
-    return cleaned_name
