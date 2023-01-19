@@ -198,9 +198,13 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                         user_is_sure = create_discard_are_you_sure_popup()
                         if not user_is_sure:
                             continue
+                        else:
+                            pass  # TODO: actually discard the sample
+                    elif event == "Set this pop NA":
+                        # Add the sample to the yaml file under the NA entry for that gate
+                        add_to_output_yaml(output_folder=output_folder, gate_name=gate_name, descriptors=['NA'],
+                                           sample_id=collect_name_of_pdf_at_index(file_list, image_index))
                     event_list = []
-                    # These events should trigger a next sample call
-                    # next_sample(window_ref, image_index, file_list, page_no)
                     image_index = next_sample(window_ref=window, image_index=image_index,
                                               file_list=file_list, page_no=page_no)
                     if image_index is False:  # Win condition achieved
