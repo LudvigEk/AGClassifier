@@ -35,7 +35,7 @@ def create_invalid_select_window():
     return
 
 
-def update_image(window_ref, image_index, file_list, page_no=0) -> int:
+def update_image(window_ref, image_index, file_list, page_no=0):
     """
     Update the image being shown in the PySimpleGUI window. Replace the current image with the image at the page
     'page_no' of the file specified in 'file_list'['image_index'].

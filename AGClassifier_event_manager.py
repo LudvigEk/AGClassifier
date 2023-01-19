@@ -79,7 +79,7 @@ def start_analysis(window_ref, image_index=0, file_list=[], page_no=0):
         raise ValueError("No file list provided")
     if check_if_discarded(image_index, file_list):  # If the first sample is discarded, go to the next one
         image_index = next_sample(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
-    image_index = update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
+    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
 
     return image_index
 
@@ -106,7 +106,7 @@ def next_sample(window_ref, image_index: int, file_list: list, page_no: int):
     if image_index >= len(file_list):
         create_complete_window()  # All samples have been analysed
         return False
-    image_index = update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
+    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
 
     return image_index
 
@@ -117,7 +117,7 @@ def previous_sample(window_ref, image_index, file_list, page_no):
     # If there is no previous sample, do nothing
     # If the previous sample is discarded, skip it and go to the previous one
     # Until a non-discarded sample is found or there are no more samples, in which case do nothing
-    image_index = update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
+    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
 
     return image_index
 
@@ -205,9 +205,13 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                                                   file_list=file_list, page_no=page_no)
                 elif event == "START":
                     event_list = []
+                    #Image_index before start_analyis
+                    print("Image index before start_analysis: ", image_index)
                     # Trigger update_image at sample X or from the beginning
                     image_index = start_analysis(window_ref=window, image_index=image_index,
                                                  file_list=file_list, page_no=page_no)
+                    # We pritn image_index
+                    print("Image index after start_analysis: ", image_index)
                 elif event == "DONE, next image":
                     # First check that the event list is valid
                     # This spawns an invalid selection window if not
