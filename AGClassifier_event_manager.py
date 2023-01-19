@@ -4,7 +4,8 @@ import sys
 from glob import glob
 
 from AGClassifier_utilities import create_invalid_select_window, create_pdf_window, update_image, add_to_output_yaml, \
-    collect_name_of_pdf_at_index, check_if_discarded, create_complete_window, check_if_in_yaml, remove_from_yaml
+    collect_name_of_pdf_at_index, check_if_discarded, create_complete_window, check_if_in_yaml, remove_from_yaml, \
+    create_discard_are_you_sure_popup
 
 
 def check_event_categories(event_list, event_descriptor_dict) -> bool:
@@ -131,7 +132,7 @@ def is_context_event(event) -> bool:
     """
 
     if event in ["START", "DONE, next image", "Previous image", "Exit", "WIN_CLOSED",
-                 "Open pdf", "Set this pop NA", "Discard", "-SAMPLENO-"]:
+                 "Open pdf", "Set this pop NA", "DISCARD", "-SAMPLENO-"]:
         return True
     else:
         return False
@@ -193,7 +194,10 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                 break
             else:
                 if event in ["Set this pop NA", "DISCARD"]:
-                    # TODO: include a popup that makes sure the user wants to discard the sample
+                    if event == "DISCARD":
+                        user_is_sure = create_discard_are_you_sure_popup()
+                        if not user_is_sure:
+                            continue
                     event_list = []
                     # These events should trigger a next sample call
                     # next_sample(window_ref, image_index, file_list, page_no)

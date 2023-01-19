@@ -435,3 +435,21 @@ def remove_from_yaml(sample_name: str, output_folder: str, gate_name: str) -> No
                         yaml_full_dict[gate_name][descriptor].remove(sample_name)
         with open(output_folder + "/corrections.yaml", "w") as out_file:
             yaml.safe_dump(yaml_full_dict, out_file)
+
+
+def create_discard_are_you_sure_popup() -> bool:
+    """
+    Create a PySimpleGUI popup to confirm the user wants to discard the current sample.
+
+    :return:
+    """
+
+    layout = [[sg.Text("Are you sure you want to discard this sample?")],
+              [sg.Button("Yes"), sg.Button("No")]]
+    window = sg.Window("Discard sample", layout)
+    event, values = window.read()
+    window.close()
+    if event == "Yes":
+        return True
+    else:
+        return False
