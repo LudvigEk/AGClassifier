@@ -292,7 +292,7 @@ def check_if_discarded(image_index: int, file_list: list) -> bool:
         values["-FOLDER-"], file_list[image_index]
 
     )
-    cleaned_name = cleaned_name = os.path.basename(filename).replace(".pdf", "")
+    cleaned_name = os.path.basename(filename).replace(".pdf", "")
 
     if any([cleaned_name in x for x in discard_list]):
         return True
@@ -391,3 +391,27 @@ def collect_name_of_pdf_at_index(pdf_list: list, image_index: int) -> str:
     cleaned_name = os.path.basename(filename).replace(".pdf", "")
 
     return cleaned_name
+
+
+def check_if_in_yaml(sample_name: str, output_folder: str, gate_name: str) -> bool:
+    """
+    Check if the sample already appears in the yaml file. If so, warn the user that the sample they are looking at
+    already has corrections assigned to it. TODO If new corrections are given, the old ones will be removed?
+
+    :param sample_name: Name of the sample.
+    :param output_folder: Folder where the output yaml file is located.
+    :param gate_name: Name of the gate the corrections apply to.
+    :return: True if the sample is already in the yaml file, False otherwise.
+    """
+
+    if os.path.exists(output_folder + "/corrections.yaml"):
+        with open(output_folder + "/corrections.yaml", "r") as in_file:
+            yaml_full_dict = yaml.safe_load(in_file)  # Dict of lists
+            if yaml_full_dict is None or gate_name not in yaml_full_dict:
+                return False  # If the file is empty, the sample is not in it. Same if the gate is not in the file.
+            for descriptor in yaml_full_dict[gate_name]:
+                if sample_name in yaml_full_dict[gate_name][descriptor]:
+                    return True
+    else:
+        return False  # If the file does not exist, the sample is not in it.
+
