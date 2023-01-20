@@ -59,9 +59,9 @@ if __name__ == "__main__":
                              "Xlim 300": "Xlim_300",
                              "Xlim 400": "Xlim_400",
                              "Xlim 700": "Xlim_700",
-                             "Custom 1": "CUSTOM_",
-                             "Custom 2": "CUSTOM_",
-                             "Custom 3": "CUSTOM_"
+                             "Custom 1": "CUSTOM_my_first_button",
+                             "Custom 2": "CUSTOM_my_second_button",
+                             "Custom 3": "CUSTOM_my_third_button"
                              }
 
     # Make into a dict

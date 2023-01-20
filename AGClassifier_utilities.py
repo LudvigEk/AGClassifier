@@ -84,7 +84,8 @@ def update_image(window_ref, image_index, file_list, page_no=0):
         window_y_size = window_y_size/2
         cur_page = page_no[0]
 
-    data = get_page(cur_page, dlist_tab, doc)  # show page 1 for start
+    pixmap = get_page(cur_page, dlist_tab, doc, width=window_x_size, height=window_y_size)  # show page 1 for start
+    data = pixmap.tobytes("png")
     window_ref["-IMAGE-"].update(data=data, size=(window_x_size, window_y_size))
 
     # Check if in any index:
@@ -225,7 +226,6 @@ def create_no_sample_pdf():
 def create_complete_window():
     """
     Popup window to notify user that all samples have been processed.
-    TODO: This should not return a window reference, it should collect and handle user events
 
     :return: PySimpleGUI window
     """
@@ -236,10 +236,15 @@ def create_complete_window():
             sg.Button('OK', size=(8, 4))
         ]
     ]
-    return sg.Window("Complete", layout)
+    windowref = sg.Window("Complete", layout)
+    debug_event, debug_values = windowref.read()
+    if debug_event == "OK" or debug_event == sg.WIN_CLOSED:
+        windowref.close()
+    return
 
 
-def get_page(pno, dlist_tab, doc):
+
+def get_page(pno, dlist_tab, doc, width=0, height=0):
     """
     Get specific page of the document using pix.
 
@@ -257,8 +262,15 @@ def get_page(pno, dlist_tab, doc):
     if not dlist:  # create if not yet there
         dlist_tab[pno] = doc[pno].get_displaylist()
         dlist = dlist_tab[pno]
-    pix = dlist.get_pixmap(alpha=False)
-    return pix.tobytes("png")
+
+    # get raw pixmap
+    raw_pixmap = dlist.get_pixmap(alpha=False)
+    if raw_pixmap.width / raw_pixmap.height < width / height:
+        zoomY = height / raw_pixmap.height
+        zoomX = width / raw_pixmap.width
+    mat = fitz.Matrix(zoomX, zoomY)
+    pix = dlist.get_pixmap(matrix=mat, alpha=False)
+    return pix
 
 
 def check_if_discarded(image_index: int, file_list: list) -> bool:

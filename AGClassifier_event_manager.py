@@ -106,7 +106,7 @@ def next_sample(window_ref, image_index: int, file_list: list, page_no: int):
     # Check if new_index is out of scope. If so return False to finish
     if image_index >= len(file_list):
         create_complete_window()  # All samples have been analysed
-        return False
+        sys.exit(0)
     update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
 
     return image_index
@@ -165,12 +165,14 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
 
     # Initialise the event list with no elements
     event_list = []
-    while True:
+    bOk = True
+    while bOk:
         # A few debug prints. TODO: Remove these when done
         print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
         print("Image index: ", image_index)
         sample_name = collect_name_of_pdf_at_index(file_list, image_index)
         print(f"Sample name corresponding to that index is {sample_name}")
+        print("bOk: ", bOk)
         sample_in_yaml = check_if_in_yaml(sample_name, output_folder, gate_name)  # Flag used to 'correct' if new limits
         if sample_in_yaml:
             print(f"Sample {sample_name} was already analysed at this gate!")  # TODO: this should be a real warning
@@ -197,7 +199,7 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                         image_index = old_image_index
                         values["-SAMPLENO-"] = image_index
             elif event == "Exit" or event == "WIN_CLOSED":
-                break
+                sys.exit(0)
             else:
                 if event in ["Set this pop NA", "DISCARD"]:
                     if event == "DISCARD":
@@ -213,8 +215,6 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                     event_list = []
                     image_index = next_sample(window_ref=window, image_index=image_index,
                                               file_list=file_list, page_no=page_no)
-                    if image_index is False:  # Win condition achieved
-                        break
                 elif event in ["previous"]:
                     event_list = []
                     image_index = previous_sample(window_ref=window, image_index=image_index,
