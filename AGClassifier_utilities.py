@@ -101,12 +101,12 @@ def update_image(window_ref, image_index, file_list, page_no=0):
     window_ref.refresh()
 
 
-def create_pdf_window(fname: str, ID) -> bool:
+def create_pdf_window(fname: str, window_name) -> bool:
     """
     Creates a window with a PDF of all images belonging to the same sample.
 
     :param fname: filename of the PDF
-    :param ID: sample ID
+    :param window_name: name of the window to be created
     :return: False if an error happened, True otherwise
     """
 
@@ -137,7 +137,7 @@ def create_pdf_window(fname: str, ID) -> bool:
     ]
     my_keys = ("Next", "Next:34", "Prev", "Prior:33", "MouseWheel:Down", "MouseWheel:Up")
 
-    window = sg.Window(ID, layout,
+    window = sg.Window(window_name, layout,
                        return_keyboard_events=True, use_default_focus=False)
 
     while True:

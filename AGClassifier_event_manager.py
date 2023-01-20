@@ -118,6 +118,12 @@ def previous_sample(window_ref, image_index, file_list, page_no):
     # If there is no previous sample, do nothing
     # If the previous sample is discarded, skip it and go to the previous one
     # Until a non-discarded sample is found or there are no more samples, in which case do nothing
+    if image_index == 0:
+        print("This is the first sample")  # TODO: Make this into a proper warning
+        return image_index
+    else:
+        image_index = image_index - 1
+
     update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
 
     return image_index
@@ -174,7 +180,7 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
         if is_context_event(event):
             # The open pdf event is a special case, it does not clear the event list
             if event == 'Open pdf':
-                if create_pdf_window():  # Returns True if pdf exists and is opened, False otherwise
+                if create_pdf_window(file_list[image_index], 0):  # Returns True if pdf exists and is opened, False otherwise
                     continue
             elif event == "-SAMPLENO-":
                 # if the input sampleno is a integer and in-bounds of the file list, update the image_index
@@ -224,7 +230,7 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                     if check_event_categories(event_list, event_descriptor_dict):
                         if sample_in_yaml and event_list:  # If sample was already in the yaml and new limits were given
                             remove_from_yaml(sample_name, output_folder, gate_name)
-                        # If so, run the event handler
+                        # If so, run the limit event handler
                         limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_name, sample_name)
                         # then clear the event list and go to the next sample
                         event_list = []
@@ -234,6 +240,10 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                         # Otherwise, clear the event list and keep going on the same sample
                         event_list = []
                     window["-CORRECTIONS-"].update(value=' '.join(event_list))  # Display the event list in the GUI
+                elif event == "Previous image":
+                    event_list = []
+                    image_index = previous_sample(window_ref=window, image_index=image_index,
+                                                  file_list=file_list, page_no=page_no)
         else:
             # If the event is not a context event, add it to the event list
             event_list.append(event)
