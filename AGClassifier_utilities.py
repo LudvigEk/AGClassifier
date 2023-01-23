@@ -7,6 +7,21 @@ import sys
 import yaml
 import PySimpleGUI as sg
 
+# Global variable correction_yaml_file, gets set by AGClassifier on selecting output folder
+# All functions that need this filepath/global variable are in AGClassifier_utilities.py
+global correction_yaml_file
+correction_yaml_file = "correction.yaml"
+
+def set_correction_yaml_global(path):
+    """
+    Set the global variable for the correction yaml file to the path specified.
+
+    :param path: Path to the correction yaml file
+    :return:
+    """
+
+    global correction_yaml_file
+    correction_yaml_file = path
 
 # Wrong selection window
 def create_invalid_select_window():
@@ -35,7 +50,7 @@ def create_invalid_select_window():
     return
 
 
-def update_image(window_ref, image_index, file_list, page_no=0):
+def update_image(window_ref, image_index, file_list, page_no=0, sample_in_yaml_string=""):
     """
     Update the image being shown in the PySimpleGUI window. Replace the current image with the image at the page
     'page_no' of the file specified in 'file_list'['image_index'].
@@ -61,7 +76,7 @@ def update_image(window_ref, image_index, file_list, page_no=0):
     cleaned_name = os.path.basename(filename).replace(".pdf", "")
 
     window_ref["-TOUT-"].update(cleaned_name)
-    countStr = str(image_index) + "/" + str(len(file_list))
+    countStr = str(image_index+1) + "/" + str(len(file_list))
     window_ref["-COUNT-"].update(countStr)
 
     # Open image X from pdf
@@ -88,14 +103,14 @@ def update_image(window_ref, image_index, file_list, page_no=0):
     data = pixmap.tobytes("png")
     window_ref["-IMAGE-"].update(data=data, size=(window_x_size, window_y_size))
 
-    # Check if in any index:
-    sampleInIndexFiles = check_if_in_index_files(image_index, file_list)
-    window_ref["-INDEX-"].update(sampleInIndexFiles)
+    # Show list of which gates this sample has been classified as in the yaml
+    window_ref["-INDEX-"].update(sample_in_yaml_string)
 
     # If image_index is a tuple, then load/update the second image
-    if isinstance(image_index, tuple):
+    if isinstance(page_no, tuple):
         second_page = page_no[1]
-        second_image_data = get_page(second_page, dlist_tab, doc)
+        second_image_page = get_page(second_page, dlist_tab, doc, width=window_x_size, height=window_y_size)
+        second_image_data = second_image_page.tobytes("png")
         window_ref["-IMAGE2-"].update(data=second_image_data, size=(window_x_size, window_y_size))
 
     # Refresh entire window
@@ -282,34 +297,20 @@ def check_if_discarded(image_index: int, file_list: list) -> bool:
     :return:
     """
 
+
     if image_index is None:
-        print("WARNING: image_index is None")
+        print("WARNING, in check_if_discarded: image_index is None")
         return False
 
     if image_index >= len(file_list):
+        print("WARNING, in check_if_discarded: image_index out of range")
         return False
 
-    # TODO update this once the .yaml format is updated. For now just accept all samples.
+    cleaned_name = collect_name_of_pdf_at_index(file_list, image_index)
+    if check_if_in_yaml(cleaned_name, gate_name="DISCARD"):
+        return True
     return False
 
-    discard_list = []
-    discard_file = values["-OUT_FOLDER-"] + "/discard.txt"
-
-    if os.path.exists(discard_file):
-        with open(discard_file, 'r', newline='\n') as f:
-            discard_list = f.read().splitlines()
-
-    filename = os.path.join(
-
-        values["-FOLDER-"], file_list[image_index]
-
-    )
-    cleaned_name = os.path.basename(filename).replace(".pdf", "")
-
-    if any([cleaned_name in x for x in discard_list]):
-        return True
-    else:
-        return False
 
 
 def check_if_in_index_files(image_index, file_list):
@@ -355,24 +356,19 @@ def check_if_in_index_files(image_index, file_list):
     return outStr
 
 
-def add_to_output_yaml(output_folder: str, gate_name: str, descriptors: list, sample_id: str) -> None:
+def add_to_output_yaml(gate_name: str, descriptors: list, sample_id: str) -> None:
     """
     Add the corrections specified by the user to the yaml file specific to that gate.
     TODO: Fix duplicated sample IDs. Entries on each descriptor should be unique.
 
-    :param output_folder: folder where the output yaml file is located
     :param gate_name: Name of the gate the corrections apply to. It will be used to create the output file name.
     :param descriptors: List of descriptors to be added/expanded upon in the output file.
     :param sample_id: ID of the sample the corrections apply to.
     :return:
     """
 
-    # If output file does not exist, create it.
-    if not os.path.exists(output_folder + "/corrections.yaml"):
-        with open(output_folder + "/corrections.yaml", 'w') as f:
-            f.write("")
     # Read the output file, add the corrections to the appropriate sample, then write the file again.
-    with open(output_folder + "/corrections.yaml", "r") as in_file:
+    with open(correction_yaml_file, "r") as in_file:
         yaml_full_dict = yaml.safe_load(in_file)  # Dict of lists
         if yaml_full_dict is None:
             yaml_full_dict = {}
@@ -386,7 +382,8 @@ def add_to_output_yaml(output_folder: str, gate_name: str, descriptors: list, sa
                 if sample_id not in yaml_full_dict[gate_name][descriptor]:
                     yaml_full_dict[gate_name][descriptor].append(sample_id)
                 yaml_full_dict[gate_name][descriptor].sort()  # TODO: natural sorting instead?
-    with open(output_folder + "/corrections.yaml", "w") as out_file:
+
+    with open(correction_yaml_file, "w") as out_file:
         yaml.safe_dump(yaml_full_dict, out_file)
 
 
@@ -405,48 +402,51 @@ def collect_name_of_pdf_at_index(pdf_list: list, image_index: int) -> str:
     return cleaned_name
 
 
-def check_if_in_yaml(sample_name: str, output_folder: str, gate_name: str) -> bool:
+def check_if_in_yaml(sample_name: str, gate_name: str) -> bool:
     """
     Check if the sample already appears in the yaml file. If so, warn the user that the sample they are looking at
     already has corrections assigned to it. TODO If new corrections are given, the old ones will be removed?
 
     :param sample_name: Name of the sample.
-    :param output_folder: Folder where the output yaml file is located.
     :param gate_name: Name of the gate the corrections apply to.
     :return: True if the sample is already in the yaml file, False otherwise.
     """
 
-    if os.path.exists(output_folder + "/corrections.yaml"):
-        with open(output_folder + "/corrections.yaml", "r") as in_file:
-            yaml_full_dict = yaml.safe_load(in_file)  # Dict of lists
-            if yaml_full_dict is None or gate_name not in yaml_full_dict:
-                return False  # If the file is empty, the sample is not in it. Same if the gate is not in the file.
-            for descriptor in yaml_full_dict[gate_name]:
-                if sample_name in yaml_full_dict[gate_name][descriptor]:
-                    return True
-    else:
-        return False  # If the file does not exist, the sample is not in it.
+    # test print correction_yaml_file
+    print("correct_yaml_file: ", correction_yaml_file)
+
+    with open(correction_yaml_file, "r") as in_file:
+        yaml_full_dict = yaml.safe_load(in_file)  # Dict of lists
+        if yaml_full_dict is None or gate_name not in yaml_full_dict:
+            return False  # If the file is empty, the sample is not in it. Same if the gate is not in the file.
+        for descriptor in yaml_full_dict[gate_name]:
+            if sample_name in yaml_full_dict[gate_name][descriptor]:
+                return True
+        else:
+            return False
 
 
-def remove_from_yaml(sample_name: str, output_folder: str, gate_name: str) -> None:
+
+def remove_from_yaml(sample_name: str, gate_name: str) -> None:
     """
     Remove all appearances of the sample name at the specified gate from yaml file.
 
     :param sample_name: Name of the sample to be removed.
-    :param output_folder: Folder where the output yaml file is located.
     :param gate_name: Name of the gate the corrections apply to.
     :return: None
     """
 
-    if os.path.exists(output_folder + "/corrections.yaml"):
-        with open(output_folder + "/corrections.yaml", "r") as in_file:
-            yaml_full_dict = yaml.safe_load(in_file)
-            if (yaml_full_dict is not None) and (gate_name in yaml_full_dict):
-                for descriptor in yaml_full_dict[gate_name]:
-                    if sample_name in yaml_full_dict[gate_name][descriptor]:
-                        yaml_full_dict[gate_name][descriptor].remove(sample_name)
-        with open(output_folder + "/corrections.yaml", "w") as out_file:
-            yaml.safe_dump(yaml_full_dict, out_file)
+    # test print correction_yaml_file
+    print("correct_yaml_file: ", correction_yaml_file)
+
+    with open(correction_yaml_file, "r") as in_file:
+        yaml_full_dict = yaml.safe_load(in_file)
+        if (yaml_full_dict is not None) and (gate_name in yaml_full_dict):
+            for descriptor in yaml_full_dict[gate_name]:
+                if sample_name in yaml_full_dict[gate_name][descriptor]:
+                    yaml_full_dict[gate_name][descriptor].remove(sample_name)
+    with open(correction_yaml_file, "w") as out_file:
+        yaml.safe_dump(yaml_full_dict, out_file)
 
 
 def create_discard_are_you_sure_popup() -> bool:

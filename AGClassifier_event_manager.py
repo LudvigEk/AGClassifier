@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 import sys
 from glob import glob
+import PySimpleGUI as sg
 
 from AGClassifier_utilities import create_invalid_select_window, create_pdf_window, update_image, add_to_output_yaml, \
     collect_name_of_pdf_at_index, check_if_discarded, create_complete_window, check_if_in_yaml, remove_from_yaml, \
     create_discard_are_you_sure_popup
+
 
 
 def check_event_categories(event_list, event_descriptor_dict) -> bool:
@@ -35,7 +37,7 @@ def check_event_categories(event_list, event_descriptor_dict) -> bool:
         return True
 
 
-def limit_event_handler(event_list: list, output_folder: str, event_descriptor_dict: dict, gate_name: str,
+def limit_event_handler(event_list: list, event_descriptor_dict: dict, gate_name: str,
                         sample_name: str) -> None:
     """
     Deal with the so called 'limit events'. Update the output yaml file with by adding the name of the current sample
@@ -43,7 +45,6 @@ def limit_event_handler(event_list: list, output_folder: str, event_descriptor_d
     Check if event exists in the button_descriptor_dict. If not, raise an error.
 
     :param event_list: List of all "limit events" (i.e. events that are not context events) that were clicked.
-    :param output_folder: The output folder where the output files will be saved. Defined by user on startup.
     :param event_descriptor_dict: Maps the event/button names to the descriptors. Taken from the .pickle file.
     :param gate_name: Name of the gate. Taken from the .pickle file.
     :param sample_name: Name of the current sample. Taken from the PDF file name.
@@ -58,7 +59,7 @@ def limit_event_handler(event_list: list, output_folder: str, event_descriptor_d
         else:
             raise_str = "Event " + str(event) + " not found in event_descriptor_dict and is not a custom event"
             raise ValueError(raise_str)
-    add_to_output_yaml(output_folder, gate_name, descriptor_list, sample_name)
+    add_to_output_yaml(gate_name, descriptor_list, sample_name)
 
     return
 
@@ -78,9 +79,10 @@ def start_analysis(window_ref, image_index=0, file_list=[], page_no=0):
 
     if not isinstance(file_list, list) or not file_list:
         raise ValueError("No file list provided")
-    if check_if_discarded(image_index, file_list):  # If the first sample is discarded, go to the next one
+    if check_if_discarded(image_index, file_list=file_list):  # If the first sample is discarded, go to the next one
         image_index = next_sample(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
-    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
+
+    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no, sample_in_yaml_string="") # TODO sample_in_yaml_string obviously shouldnt be empty
 
     return image_index
 
@@ -100,7 +102,7 @@ def next_sample(window_ref, image_index: int, file_list: list, page_no: int):
     image_index = image_index + 1
 
     # Validate image_index, if invalid, try next image until valid or end of list
-    while check_if_discarded(image_index, file_list):  # Skip discarded samples
+    while check_if_discarded(image_index, file_list=file_list):  # Skip discarded samples
         image_index += 1
 
     # Check if new_index is out of scope. If so return False to finish
@@ -113,16 +115,22 @@ def next_sample(window_ref, image_index: int, file_list: list, page_no: int):
 
 
 def previous_sample(window_ref, image_index, file_list, page_no):
-    # TODO: implement this function
     # Get the previous sample
     # If there is no previous sample, do nothing
     # If the previous sample is discarded, skip it and go to the previous one
     # Until a non-discarded sample is found or there are no more samples, in which case do nothing
+
     if image_index == 0:
-        print("This is the first sample")  # TODO: Make this into a proper warning
+        sg.popup("This is the first sample")
         return image_index
     else:
         image_index = image_index - 1
+
+    while check_if_discarded(image_index, file_list=file_list):  # Skip discarded samples
+        image_index -= 1
+        if image_index == 0:
+            break
+
 
     update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
 
@@ -144,7 +152,7 @@ def is_context_event(event) -> bool:
         return False
 
 
-def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_no, gate_name) -> None:
+def event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name) -> None:
     """
     The event loop. This is the main function of the program.
     TODO handle image_index events
@@ -152,12 +160,13 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
 
     :param window: PySimpleGUI window
     :param input_folder: The input folder where the PDF files are located. Defined by user on startup.
-    :param output_folder: The output folder where the output files will be saved. Defined by user on startup.
     :param event_descriptor_dict: Maps the event/button names to the descriptors. Taken from the .pickle file.
     :param page_no: The page number of the PDF file that will be displayed.
     :param gate_name: Name of the gate being QC'd. Taken from the .pickle file.
+    :param yaml_file: The output yaml file where the results will be stored.
     :return: None
     """
+
     image_index = 0
     file_list = glob(input_folder + "/*.pdf")  # initialise_parameters(event_descriptor_dict)
     if len(file_list) == 0 or file_list is None:
@@ -167,17 +176,12 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
     event_list = []
     bOk = True
     while bOk:
-        # A few debug prints. TODO: Remove these when done
-        print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
-        print("Image index: ", image_index)
         sample_name = collect_name_of_pdf_at_index(file_list, image_index)
-        print(f"Sample name corresponding to that index is {sample_name}")
-        print("bOk: ", bOk)
-        sample_in_yaml = check_if_in_yaml(sample_name, output_folder, gate_name)  # Flag used to 'correct' if new limits
+        sample_in_yaml = check_if_in_yaml(sample_name, gate_name)  # Flag used to 'correct' if new limits
         if sample_in_yaml:
-            print(f"Sample {sample_name} was already analysed at this gate!")  # TODO: this should be a real warning
+            # TODO; Popup too annoying?
+            sg.popup(f"Sample {sample_name} has already been analysed for this gate!")
         event, values = window.read()
-        print(f"E: {event}, V: {values}")
         # First check for context events (start, exit, previous, discard, set to na, open pdf)
         if is_context_event(event):
             # The open pdf event is a special case, it does not clear the event list
@@ -205,12 +209,14 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                     if event == "DISCARD":
                         user_is_sure = create_discard_are_you_sure_popup()
                         if not user_is_sure:
-                            continue
+                            pass
                         else:
-                            pass  # TODO: actually discard the sample
+                            add_to_output_yaml(gate_name="DISCARD",
+                                               descriptors=['DISCARD'],
+                                               sample_id=collect_name_of_pdf_at_index(file_list, image_index))
                     elif event == "Set this pop NA":
                         # Add the sample to the yaml file under the NA entry for that gate
-                        add_to_output_yaml(output_folder=output_folder, gate_name=gate_name, descriptors=['NA'],
+                        add_to_output_yaml(gate_name=gate_name, descriptors=['NA'],
                                            sample_id=collect_name_of_pdf_at_index(file_list, image_index))
                     event_list = []
                     image_index = next_sample(window_ref=window, image_index=image_index,
@@ -229,9 +235,9 @@ def event_loop(window, input_folder, output_folder, event_descriptor_dict, page_
                     # First check that the event list is valid. This spawns an invalid selection window if not
                     if check_event_categories(event_list, event_descriptor_dict):
                         if sample_in_yaml and event_list:  # If sample was already in the yaml and new limits were given
-                            remove_from_yaml(sample_name, output_folder, gate_name)
+                            remove_from_yaml(sample_name, gate_name)
                         # If so, run the limit event handler
-                        limit_event_handler(event_list, output_folder, event_descriptor_dict, gate_name, sample_name)
+                        limit_event_handler(event_list, event_descriptor_dict, gate_name, sample_name)
                         # then clear the event list and go to the next sample
                         event_list = []
                         image_index = next_sample(window_ref=window, image_index=image_index,

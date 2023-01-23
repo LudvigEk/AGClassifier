@@ -7,18 +7,37 @@ import PySimpleGUI as sg
 from AGClassifier_layouts import layout_selector
 
 from AGClassifier_event_manager import event_loop
+from AGClassifier_utilities import set_correction_yaml_global
 
+import os
 
 def select_folders():
     """
     Initial popups to select input and output folders
     :return: input_folder, output_folder
     """
-    # TODO error/invalid handling
+    # input_folder = sg.popup_get_folder("Select input folder")
+    # if no folder is selected, make a popup requesting the sure to select a folder
     input_folder = sg.popup_get_folder("Select input folder")
-    output_folder = sg.popup_get_folder("Select output folder")
+    while input_folder is None or input_folder == "":
+        sg.popup("Please select a valid input folder")
+        input_folder = sg.popup_get_folder("Select input folder")
 
-    return input_folder, output_folder
+    output_folder = sg.popup_get_folder("Select output folder")
+    while output_folder is None or output_folder == "":
+        sg.popup("Please select a valid output folder")
+        output_folder = sg.popup_get_folder("Select output folder")
+
+    # Global variable correction_yaml_file
+    # Check if it already exists, otherwise touch
+    # Then set the global variable internally
+    correction_yaml_file = os.path.join(output_folder, "correction.yaml")
+    set_correction_yaml_global(correction_yaml_file)
+
+    if not os.path.exists(correction_yaml_file):
+        open(correction_yaml_file, "w").close()
+
+    return input_folder, correction_yaml_file
 
 
 def main():
@@ -28,7 +47,7 @@ def main():
     """
 
     # First select input and output folders
-    input_folder, output_folder = select_folders()
+    input_folder, yaml_file = select_folders()
 
     # Then select layout
     layout, event_descriptor_dict, page_no, gate_name = layout_selector()
@@ -37,7 +56,7 @@ def main():
     window = sg.Window(title="AliGater image classifier", layout=layout)
 
     # Run the event loop
-    event_loop(window, input_folder, output_folder, event_descriptor_dict, page_no, gate_name)
+    event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name)
 
     window.close()
 
