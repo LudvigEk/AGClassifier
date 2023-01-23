@@ -12,6 +12,7 @@ import PySimpleGUI as sg
 global correction_yaml_file
 correction_yaml_file = "correction.yaml"
 
+
 def set_correction_yaml_global(path):
     """
     Set the global variable for the correction yaml file to the path specified.
@@ -22,6 +23,7 @@ def set_correction_yaml_global(path):
 
     global correction_yaml_file
     correction_yaml_file = path
+
 
 # Wrong selection window
 def create_invalid_select_window():
@@ -76,7 +78,7 @@ def update_image(window_ref, image_index, file_list, page_no=0, sample_in_yaml_s
     cleaned_name = os.path.basename(filename).replace(".pdf", "")
 
     window_ref["-TOUT-"].update(cleaned_name)
-    countStr = str(image_index+1) + "/" + str(len(file_list))
+    countStr = str(image_index + 1) + "/" + str(len(file_list))
     window_ref["-COUNT-"].update(countStr)
 
     # Open image X from pdf
@@ -95,8 +97,8 @@ def update_image(window_ref, image_index, file_list, page_no=0, sample_in_yaml_s
     if isinstance(page_no, int):
         cur_page = page_no
     else:
-        window_x_size = window_x_size/2
-        window_y_size = window_y_size/2
+        window_x_size = window_x_size / 2
+        window_y_size = window_y_size / 2
         cur_page = page_no[0]
 
     pixmap = get_page(cur_page, dlist_tab, doc, width=window_x_size, height=window_y_size)  # show page 1 for start
@@ -258,7 +260,6 @@ def create_complete_window():
     return
 
 
-
 def get_page(pno, dlist_tab, doc, width=0, height=0):
     """
     Get specific page of the document using pix.
@@ -297,7 +298,6 @@ def check_if_discarded(image_index: int, file_list: list) -> bool:
     :return:
     """
 
-
     if image_index is None:
         print("WARNING, in check_if_discarded: image_index is None")
         return False
@@ -310,7 +310,6 @@ def check_if_discarded(image_index: int, file_list: list) -> bool:
     if check_if_in_yaml(cleaned_name, gate_name="DISCARD"):
         return True
     return False
-
 
 
 def check_if_in_index_files(image_index, file_list):
@@ -426,7 +425,6 @@ def check_if_in_yaml(sample_name: str, gate_name: str) -> bool:
             return False
 
 
-
 def remove_from_yaml(sample_name: str, gate_name: str) -> None:
     """
     Remove all appearances of the sample name at the specified gate from yaml file.
@@ -465,3 +463,27 @@ def create_discard_are_you_sure_popup() -> bool:
         return True
     else:
         return False
+
+
+def create_yaml_string(image_index:str, file_list:list) -> str:
+    # For the given sample name, parse the yaml and collect all descriptors where it appears,
+    # also check the discard descriptor.
+    # Return a string with all the descriptors and discard status.
+    # Split it up in 1 descriptor per line
+    descriptors = ""
+
+    sample_name = collect_name_of_pdf_at_index(file_list, image_index)
+
+    with open(correction_yaml_file, "r") as in_file:
+        yaml_full_dict = yaml.safe_load(in_file)
+        if yaml_full_dict is not None:
+            if sample_name in yaml_full_dict["DISCARD"]["DISCARD"]:
+                descriptors += "Discard\n"
+            for gate_name in yaml_full_dict.keys():
+                gate_descriptors = []
+                for descriptor in yaml_full_dict[gate_name]:
+                    if sample_name in yaml_full_dict[gate_name][descriptor]:
+                        gate_descriptors.append(descriptor)
+                if len(gate_descriptors) > 0:
+                    descriptors += gate_name + ": " + ", ".join(gate_descriptors) + "\n"
+    return descriptors

@@ -6,7 +6,7 @@ import PySimpleGUI as sg
 
 from AGClassifier_utilities import create_invalid_select_window, create_pdf_window, update_image, add_to_output_yaml, \
     collect_name_of_pdf_at_index, check_if_discarded, create_complete_window, check_if_in_yaml, remove_from_yaml, \
-    create_discard_are_you_sure_popup
+    create_discard_are_you_sure_popup, create_yaml_string
 
 
 
@@ -82,7 +82,8 @@ def start_analysis(window_ref, image_index=0, file_list=[], page_no=0):
     if check_if_discarded(image_index, file_list=file_list):  # If the first sample is discarded, go to the next one
         image_index = next_sample(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
 
-    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no, sample_in_yaml_string="") # TODO sample_in_yaml_string obviously shouldnt be empty
+    yaml_update_string = create_yaml_string(image_index=image_index, file_list=file_list)
+    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no, sample_in_yaml_string=yaml_update_string)
 
     return image_index
 
@@ -109,7 +110,9 @@ def next_sample(window_ref, image_index: int, file_list: list, page_no: int):
     if image_index >= len(file_list):
         create_complete_window()  # All samples have been analysed
         sys.exit(0)
-    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
+
+    yaml_update_string = create_yaml_string(image_index=image_index, file_list=file_list)
+    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no, sample_in_yaml_string=yaml_update_string)
 
     return image_index
 
@@ -131,8 +134,8 @@ def previous_sample(window_ref, image_index, file_list, page_no):
         if image_index == 0:
             break
 
-
-    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
+    yaml_update_string = create_yaml_string(image_index=image_index, file_list=file_list)
+    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no, sample_in_yaml_string=yaml_update_string)
 
     return image_index
 

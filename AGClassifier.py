@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from typing import List, Any
 
 import PySimpleGUI as sg
 
@@ -10,6 +9,7 @@ from AGClassifier_event_manager import event_loop
 from AGClassifier_utilities import set_correction_yaml_global
 
 import os
+
 
 def select_folders():
     """
