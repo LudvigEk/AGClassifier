@@ -140,7 +140,8 @@ def create_pdf_window(fname: str, window_name) -> bool:
     cur_page = 0
     old_page = 0
 
-    data = get_page(cur_page, dlist_tab, doc)  # show page 1 for start
+    page_data = get_page(cur_page, dlist_tab, doc, width=480, height=480)  # show page 1 for start
+    data = page_data.tobytes("png")
     image_elem = sg.Image(data=data)
     goto = sg.InputText(str(cur_page + 1), size=(5, 1))
 
@@ -189,7 +190,8 @@ def create_pdf_window(fname: str, window_name) -> bool:
             force_page = True
         # Update
         if force_page:
-            data = get_page(cur_page, dlist_tab, doc)
+            page_data = get_page(cur_page, dlist_tab, doc, width=480, height=480)
+            data = page_data.tobytes("png")
             image_elem.update(data=data)
             old_page = cur_page
     return True
@@ -281,9 +283,11 @@ def get_page(pno, dlist_tab, doc, width=0, height=0):
 
     # get raw pixmap
     raw_pixmap = dlist.get_pixmap(alpha=False)
-    if raw_pixmap.width / raw_pixmap.height < width / height:
-        zoomY = height / raw_pixmap.height
-        zoomX = width / raw_pixmap.width
+    #if raw_pixmap.width / raw_pixmap.height < width / height:
+    #    zoomY = height / raw_pixmap.height
+    #    zoomX = width / raw_pixmap.width
+    zoomY = height / raw_pixmap.height
+    zoomX = width / raw_pixmap.width
     mat = fitz.Matrix(zoomX, zoomY)
     pix = dlist.get_pixmap(matrix=mat, alpha=False)
     return pix
@@ -310,49 +314,6 @@ def check_if_discarded(image_index: int, file_list: list) -> bool:
     if check_if_in_yaml(cleaned_name, gate_name="DISCARD"):
         return True
     return False
-
-
-def check_if_in_index_files(image_index, file_list):
-    """
-    Check if the sample is in the file list.
-    TODO: Not currently implemented. Update this once the .yaml format is updated. For now just accept all samples.
-
-    :param image_index:
-    :param file_list:
-    :return:
-    """
-
-    return ""
-
-    filename = os.path.join(
-
-        values["-FOLDER-"], file_list[image_index]
-
-    )
-    cleaned_name = cleaned_name = os.path.basename(filename).replace(".pdf", "")
-    population_name = str(values["-PREFIX-"])
-
-    index_files_for_pop = glob(values["-OUT_FOLDER-"] + "/*.txt")
-    files_w_sample = []
-    if isinstance(index_files_for_pop, list):
-        for index_file in index_files_for_pop:
-            with open(index_file, 'r', newline='\n') as f:
-                content = f.read().splitlines()
-                if cleaned_name in content:
-                    files_w_sample.append(os.path.basename(index_file).replace(".txt", ""))  # Cross-platform
-                    # files_w_sample.append(index_file.split("/")[-1].replace(".txt",""))
-    elif isinstance(index_files_for_pop, str):
-        with open(index_files_for_pop, 'r', newline='\n') as f:
-            content = f.read().splitlines()
-            if cleaned_name in content:
-                files_w_sample.append(os.path.basename(index_files_for_pop).replace(".txt", ""))  # Cross-platform
-                # files_w_sample.append(index_files_for_pop.split("/")[-1].replace(".txt", ""))
-    else:
-        return ""
-    outStr = ""
-    for entry in files_w_sample:
-        outStr = entry + " " + outStr
-    return outStr
 
 
 def add_to_output_yaml(gate_name: str, descriptors: list, sample_id: str) -> None:
@@ -464,6 +425,15 @@ def create_discard_are_you_sure_popup() -> bool:
     else:
         return False
 
+def post_window_warning(window_ref, warning_string: str) -> str:
+    """
+    Takes a string and pushes that to the window ref, without any other changes
+    :return: None
+    """
+
+    window_ref["-WARNING-"].update(warning_string)
+    window_ref.refresh()
+
 
 def create_yaml_string(image_index:str, file_list:list) -> str:
     # For the given sample name, parse the yaml and collect all descriptors where it appears,
@@ -477,7 +447,7 @@ def create_yaml_string(image_index:str, file_list:list) -> str:
     with open(correction_yaml_file, "r") as in_file:
         yaml_full_dict = yaml.safe_load(in_file)
         if yaml_full_dict is not None:
-            if sample_name in yaml_full_dict["DISCARD"]["DISCARD"]:
+            if "DISCARD" in yaml_full_dict.keys() and sample_name in yaml_full_dict["DISCARD"]["DISCARD"]:
                 descriptors += "Discard\n"
             for gate_name in yaml_full_dict.keys():
                 gate_descriptors = []

@@ -6,8 +6,7 @@ import PySimpleGUI as sg
 
 from AGClassifier_utilities import create_invalid_select_window, create_pdf_window, update_image, add_to_output_yaml, \
     collect_name_of_pdf_at_index, check_if_discarded, create_complete_window, check_if_in_yaml, remove_from_yaml, \
-    create_discard_are_you_sure_popup, create_yaml_string
-
+    create_discard_are_you_sure_popup, create_yaml_string, post_window_warning
 
 
 def check_event_categories(event_list, event_descriptor_dict) -> bool:
@@ -20,16 +19,15 @@ def check_event_categories(event_list, event_descriptor_dict) -> bool:
     :param event_descriptor_dict:
     :return:
     """
+    print(event_list)
 
     event_categories = []
     for event in event_list:
-        if "_" in event:
-            event_category = event_descriptor_dict[event].split("_")[0]
-            if event_category != "CUSTOM_":
-                event_categories.append(event_category)
-        else:
-            event_categories.append(event)
+        event_category = event_descriptor_dict[event].split("_")[0]
+        if event_category != "CUSTOM" and event_category not in event_categories:
+            event_categories.append(event_category)
     event_categories = set(event_categories)
+    print(event_categories)
     if len(event_categories) < len(event_list):
         create_invalid_select_window()
         return False
@@ -83,7 +81,8 @@ def start_analysis(window_ref, image_index=0, file_list=[], page_no=0):
         image_index = next_sample(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no)
 
     yaml_update_string = create_yaml_string(image_index=image_index, file_list=file_list)
-    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no, sample_in_yaml_string=yaml_update_string)
+    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no,
+                 sample_in_yaml_string=yaml_update_string)
 
     return image_index
 
@@ -112,7 +111,8 @@ def next_sample(window_ref, image_index: int, file_list: list, page_no: int):
         sys.exit(0)
 
     yaml_update_string = create_yaml_string(image_index=image_index, file_list=file_list)
-    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no, sample_in_yaml_string=yaml_update_string)
+    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no,
+                 sample_in_yaml_string=yaml_update_string)
 
     return image_index
 
@@ -135,7 +135,8 @@ def previous_sample(window_ref, image_index, file_list, page_no):
             break
 
     yaml_update_string = create_yaml_string(image_index=image_index, file_list=file_list)
-    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no, sample_in_yaml_string=yaml_update_string)
+    update_image(window_ref=window_ref, image_index=image_index, file_list=file_list, page_no=page_no,
+                 sample_in_yaml_string=yaml_update_string)
 
     return image_index
 
@@ -179,17 +180,22 @@ def event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name) 
     event_list = []
     bOk = True
     while bOk:
+
+        event, values = window.read()
+
         sample_name = collect_name_of_pdf_at_index(file_list, image_index)
         sample_in_yaml = check_if_in_yaml(sample_name, gate_name)  # Flag used to 'correct' if new limits
         if sample_in_yaml:
-            # TODO; Popup too annoying?
-            sg.popup(f"Sample {sample_name} has already been analysed for this gate!")
-        event, values = window.read()
+            post_window_warning(window, f"SAMPLE {sample_name} HAS ALREADY BEEN ANALYSED!")
+        else:
+            post_window_warning(window, "")
+
         # First check for context events (start, exit, previous, discard, set to na, open pdf)
         if is_context_event(event):
             # The open pdf event is a special case, it does not clear the event list
             if event == 'Open pdf':
-                if create_pdf_window(file_list[image_index], 0):  # Returns True if pdf exists and is opened, False otherwise
+                if create_pdf_window(file_list[image_index],
+                                     0):  # Returns True if pdf exists and is opened, False otherwise
                     continue
             elif event == "-SAMPLENO-":
                 # if the input sampleno is a integer and in-bounds of the file list, update the image_index
@@ -224,7 +230,7 @@ def event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name) 
                     event_list = []
                     image_index = next_sample(window_ref=window, image_index=image_index,
                                               file_list=file_list, page_no=page_no)
-                elif event in ["previous"]:
+                elif event in ["Previous image"]:
                     event_list = []
                     image_index = previous_sample(window_ref=window, image_index=image_index,
                                                   file_list=file_list, page_no=page_no)
@@ -248,14 +254,19 @@ def event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name) 
                     else:
                         # Otherwise, clear the event list and keep going on the same sample
                         event_list = []
-                    window["-CORRECTIONS-"].update(value=' '.join(event_list))  # Display the event list in the GUI
-                elif event == "Previous image":
-                    event_list = []
-                    image_index = previous_sample(window_ref=window, image_index=image_index,
-                                                  file_list=file_list, page_no=page_no)
+                    # window["-CORRECTIONS-"].update(value=' '.join(event_list))  # Display the event list in the GUI
         else:
             # If the event is not a context event, add it to the event list
             event_list.append(event)
             window["-CORRECTIONS-"].update(value=' '.join(event_list))  # Display the event list in the GUI
+
+
+        # Recheck sample and post warning if needed
+        sample_name = collect_name_of_pdf_at_index(file_list, image_index)
+        sample_in_yaml = check_if_in_yaml(sample_name, gate_name) 
+        if sample_in_yaml:
+            post_window_warning(window, f"SAMPLE {sample_name} HAS ALREADY BEEN ANALYSED!")
+        else:
+            post_window_warning(window, "")
 
     return
