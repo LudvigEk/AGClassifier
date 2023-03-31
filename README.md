@@ -5,7 +5,8 @@ Welcome to the AliGater Classifier. This is a tool for quality control (QC) of i
 
 ## Setup
 You can download AGClassifier by cloning this repository. We recommend using a virtual environment to install the
-dependencies. The following commands will create a virtual environment with the required dependencies and activate it:
+dependencies. The following commands will create a conda virtual environment with the required dependencies and activate
+it:
 
 ```bash
 conda create --file agclassifier.yaml -y

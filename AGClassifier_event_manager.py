@@ -260,10 +260,9 @@ def event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name) 
             event_list.append(event)
             window["-CORRECTIONS-"].update(value=' '.join(event_list))  # Display the event list in the GUI
 
-
         # Recheck sample and post warning if needed
         sample_name = collect_name_of_pdf_at_index(file_list, image_index)
-        sample_in_yaml = check_if_in_yaml(sample_name, gate_name) 
+        sample_in_yaml = check_if_in_yaml(sample_name, gate_name)
         if sample_in_yaml:
             post_window_warning(window, f"SAMPLE {sample_name} HAS ALREADY BEEN ANALYSED!")
         else:

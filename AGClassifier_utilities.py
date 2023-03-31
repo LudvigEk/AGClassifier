@@ -283,7 +283,7 @@ def get_page(pno, dlist_tab, doc, width=0, height=0):
 
     # get raw pixmap
     raw_pixmap = dlist.get_pixmap(alpha=False)
-    #if raw_pixmap.width / raw_pixmap.height < width / height:
+    # if raw_pixmap.width / raw_pixmap.height < width / height:
     #    zoomY = height / raw_pixmap.height
     #    zoomX = width / raw_pixmap.width
     zoomY = height / raw_pixmap.height
@@ -425,6 +425,7 @@ def create_discard_are_you_sure_popup() -> bool:
     else:
         return False
 
+
 def post_window_warning(window_ref, warning_string: str) -> str:
     """
     Takes a string and pushes that to the window ref, without any other changes
@@ -435,7 +436,7 @@ def post_window_warning(window_ref, warning_string: str) -> str:
     window_ref.refresh()
 
 
-def create_yaml_string(image_index:str, file_list:list) -> str:
+def create_yaml_string(image_index: str, file_list: list) -> str:
     # For the given sample name, parse the yaml and collect all descriptors where it appears,
     # also check the discard descriptor.
     # Return a string with all the descriptors and discard status.

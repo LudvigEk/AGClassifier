@@ -35,6 +35,22 @@ iv_column_2_images = [
 
 ]
 
+iv_column_3_images = [
+
+    [sg.Text("Image Viewer"), sg.Text(size=(120, 1), key="-WARNING-")],
+
+    [sg.Text(size=(80, 1), key="-TOUT-"), sg.Text(size=(40, 1), key="-COUNT-")],
+
+    [sg.Text("Sample ID exists in these indicies:")],
+
+    [sg.Text(size=(120, 1), key="-INDEX-")],
+
+    [sg.Image(key="-IMAGE-", size=(160, 140))],
+
+    [sg.Image(key="-IMAGE2-", size=(160, 140)), sg.Image(key="-IMAGE3-", size=(160, 140))],
+
+]
+
 # *****************  ***********************
 
 # ***************** extra buttons ***********************
@@ -137,8 +153,11 @@ def layout_selector():
         elif number_of_images == 2:
             sys.stderr.write("2 image layout selected\n")
             image_viewer_layout = iv_column_2_images
+        elif number_of_images == 3:
+            sys.stderr.write("3 image layout selected\n")
+            image_viewer_layout = iv_column_3_images
         else:
-            raise ValueError('Corrupted layout, number of images in the image viewer columns must be 1 or 2')
+            raise ValueError('Corrupted layout, number of images in the image viewer columns must be 1, 2 or 3')
 
     layout = layout_compositor(composite_variable_layout, image_viewer_layout)
 
