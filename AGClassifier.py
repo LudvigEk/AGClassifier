@@ -15,8 +15,11 @@ def select_folders():
     :return: input_folder, output_folder
     """
     # TODO error/invalid handling
-    input_folder = sg.popup_get_folder("Select input folder")
-    output_folder = sg.popup_get_folder("Select output folder")
+    input_folder = sg.popup_get_folder(message="Hello! Welcome to the AliGater Classifier.\nPlease select the folder "
+                                               "where the images are:",
+                                       title="Select input folder")
+    output_folder = sg.popup_get_folder("Select the folder where the output should be saved:",
+                                        title="Select output folder")
 
     return input_folder, output_folder
 

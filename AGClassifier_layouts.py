@@ -117,7 +117,7 @@ def layout_selector():
     """
 
     # Select pickle file
-    layout_pickle_file = sg.popup_get_file("Select layout pickle file",
+    layout_pickle_file = sg.popup_get_file(message="Please select the layout 'pickle' file:", title="Select layout pickle file",
                                            file_types=(("Pickled layout files", "*.pickle"),))
 
     # Read the pickle file
