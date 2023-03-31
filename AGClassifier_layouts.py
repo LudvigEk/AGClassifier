@@ -3,12 +3,13 @@
 
 import PySimpleGUI as sg
 import pickle
+import sys
 
 # **************** Image viewer layouts ****************
 
 iv_column_1_image = [
 
-    [sg.Text("Image Viewer")],
+    [sg.Text("Image Viewer"), sg.Text(size=(120, 1), key="-WARNING-")],
 
     [sg.Text(size=(80, 1), key="-TOUT-"), sg.Text(size=(40, 1), key="-COUNT-")],
 
@@ -22,7 +23,7 @@ iv_column_1_image = [
 
 iv_column_2_images = [
 
-    [sg.Text("Image Viewer")],
+    [sg.Text("Image Viewer"), sg.Text(size=(120, 1), key="-WARNING-")],
 
     [sg.Text(size=(80, 1), key="-TOUT-"), sg.Text(size=(40, 1), key="-COUNT-")],
 
@@ -53,19 +54,8 @@ extra_buttons_column = [
 # Static top part of the layout
 top_layout = [
     [
-        sg.Text("Page number of population:"),
-
-        sg.In(size=(25, 1), enable_events=True, key="-POPULATION-", pad=(0, 5)),
-        sg.Text("Sample No:"),
+        sg.Button('START', pad=(0, 25), size=(60, 4)), sg.Text("Sample No:"),
         sg.In(size=(5, 1), enable_events=True, key="-SAMPLENO-", pad=(0, 5))
-    ],
-    [
-        sg.Text("OUTPUT INDEX FILE PREFIX:"),
-
-        sg.In(size=(25, 1), enable_events=True, key="-PREFIX-"),
-    ],
-    [
-        sg.Button('START', pad=(0, 25), size=(60, 4)),
     ]
 ]
 
@@ -119,6 +109,10 @@ def layout_selector():
     # Select pickle file
     layout_pickle_file = sg.popup_get_file(message="Please select the layout 'pickle' file:", title="Select layout pickle file",
                                            file_types=(("Pickled layout files", "*.pickle"),))
+    while layout_pickle_file is None or layout_pickle_file == "":
+        sg.popup("Please select a valid layout pickle file")
+        layout_pickle_file = sg.popup_get_file("Select layout pickle file",
+                                               file_types=(("Pickled layout files", "*.pickle"),))
 
     # Read the pickle file
     with open(layout_pickle_file, 'rb') as f:
@@ -138,8 +132,10 @@ def layout_selector():
         gate_name = variable_layout_dict["gate_name"]
 
         if number_of_images == 1:
+            sys.stderr.write("1 image layout selected\n")
             image_viewer_layout = iv_column_1_image
         elif number_of_images == 2:
+            sys.stderr.write("2 image layout selected\n")
             image_viewer_layout = iv_column_2_images
         else:
             raise ValueError('Corrupted layout, number of images in the image viewer columns must be 1 or 2')
