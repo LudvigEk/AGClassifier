@@ -12,6 +12,12 @@ Once the installer is downloaded, run it and complete the installation steps.
 In order to confirm the installation was successful, open the Terminal ('Command Prompt' if on Windows 10) and type:
 `conda -V`.
 
+**If on Windows 10:** if the `conda` command is not recognized int the Command Prompt, you might want to add it to the PATH.
+To do this, open the Command Prompt and type:
+```
+set PATH=%PATH%;C:\Users\YOUR_USERNAME\miniconda3\Scripts
+```
+
 ## Installation of Git
 We will use Git to download the AGClassifier repository. If you already have Git installed, you can skip this step.
 
@@ -23,6 +29,12 @@ you'd like. This will install Git Bash, which is a terminal that is very similar
 
 Ensure that Git is installed by opening the Terminal/Git Bash and typing:
 `git --version`.
+
+If the `conda` command is not recognized within Git Bash, you might want to run the following command:
+```
+. /c/miniconda3/etc/profile.d/conda.sh
+```
+NOTE: you might need to edit the path depending on where miniconda is installed.
 
 ## Downloading AGClassifier
 
