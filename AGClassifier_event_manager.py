@@ -6,29 +6,37 @@ import PySimpleGUI as sg
 
 from AGClassifier_utilities import create_invalid_select_window, create_pdf_window, update_image, add_to_output_yaml, \
     collect_name_of_pdf_at_index, check_if_discarded, create_complete_window, check_if_in_yaml, remove_from_yaml, \
-    create_discard_are_you_sure_popup, create_yaml_string, post_window_warning
+    create_discard_are_you_sure_popup, create_yaml_string, post_window_warning, update_event_descriptor_dict
 
 
-def check_event_categories(event_list, event_descriptor_dict) -> bool:
+def check_event_categories(in_event_list, event_descriptor_dict) -> bool:
     """
-    Check that only one event of each category is present
-    Custom_ events are an exception to this rule
-    Custom_ events can be selected multiple times
+    Check that only one event of each category is present.
+    Custom_ events are an exception to this rule because Custom_ events can be selected multiple times.
+    This function will check that the number of event categories is equal to the number of events.
 
-    :param event_list:
-    :param event_descriptor_dict:
-    :return:
+    :param in_event_list: List of all "limit events" (i.e. events that are not context events) that were clicked.
+    :param event_descriptor_dict: Maps the event/button names to the descriptors. Taken from the .pickle file.
+    :return: True if the number of event categories is equal to the number of events. False otherwise.
     """
-    print(event_list)
+    event_list = in_event_list.copy()
+    print("event_list: ", event_list)
+    # Remove all custom events
+    for event in event_list:
+        if event.startswith("Custom"):  # Uses button name to check if it is a custom event
+            event_list.remove(event)
 
+    # Collect the event categories of the remaining events
     event_categories = []
     for event in event_list:
         event_category = event_descriptor_dict[event].split("_")[0]
-        if event_category != "CUSTOM" and event_category not in event_categories:
+        if event_category not in event_categories:
             event_categories.append(event_category)
     event_categories = set(event_categories)
-    print(event_categories)
-    if len(event_categories) < len(event_list):
+    print("event_categories: ", event_categories)
+
+    # Check that the number of event categories is equal to the number of events
+    if len(event_categories) != len(event_list):
         create_invalid_select_window()
         return False
     else:
@@ -38,9 +46,9 @@ def check_event_categories(event_list, event_descriptor_dict) -> bool:
 def limit_event_handler(event_list: list, event_descriptor_dict: dict, gate_name: str,
                         sample_name: str) -> None:
     """
-    Deal with the so called 'limit events'. Update the output yaml file with by adding the name of the current sample
-    under the selected descriptors.
-    Check if event exists in the button_descriptor_dict. If not, raise an error.
+    Deals with 'limit events', those related to buttons that specify corrections (such as marker value limits).
+    Updates the output yaml file with by adding the name of the current sample under the selected descriptors.
+    Checks if event exists in the button_descriptor_dict. If not, raises an error.
 
     :param event_list: List of all "limit events" (i.e. events that are not context events) that were clicked.
     :param event_descriptor_dict: Maps the event/button names to the descriptors. Taken from the .pickle file.
@@ -48,7 +56,6 @@ def limit_event_handler(event_list: list, event_descriptor_dict: dict, gate_name
     :param sample_name: Name of the current sample. Taken from the PDF file name.
     :return: None
     """
-
     descriptor_list = []
     for event in event_list:
         if event in event_descriptor_dict.keys():
@@ -143,7 +150,8 @@ def previous_sample(window_ref, image_index, file_list, page_no):
 
 def is_context_event(event) -> bool:
     """
-    Check if the event is a context event.
+    Check if the event is a context event. Context events are the general elements of the GUI, not related to sample
+    corrections. Buttons such as 'START', 'DONE' or 'Open pdf' are context events.
 
     :param event: PySimpleGUI event
     :return: True if the event is a context event, False otherwise
@@ -241,7 +249,11 @@ def event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name) 
                     image_index = start_analysis(window_ref=window, image_index=image_index,
                                                  file_list=file_list, page_no=page_no)
                 elif event == "DONE, next image":
-                    # First check that the event list is valid. This spawns an invalid selection window if not
+                    # Update 'event_descriptor_dict' with the new custom descriptors
+                    new_descriptors = [values["-CUSTOM1-"], values["-CUSTOM2-"], values["-CUSTOM3-"]]
+                    event_descriptor_dict = update_event_descriptor_dict(event_descriptor_dict, new_descriptors)
+                    print("event_descriptor_dict:", event_descriptor_dict)
+                    # Check that the event list is valid. This spawns an invalid selection window if not
                     if check_event_categories(event_list, event_descriptor_dict):
                         if sample_in_yaml and event_list:  # If sample was already in the yaml and new limits were given
                             remove_from_yaml(sample_name, gate_name)
@@ -249,11 +261,14 @@ def event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name) 
                         limit_event_handler(event_list, event_descriptor_dict, gate_name, sample_name)
                         # then clear the event list and go to the next sample
                         event_list = []
+                        window["-CORRECTIONS-"].update(value=' '.join(event_list))  # Display the event list in the GUI
                         image_index = next_sample(window_ref=window, image_index=image_index,
                                                   file_list=file_list, page_no=page_no)
                     else:
                         # Otherwise, clear the event list and keep going on the same sample
                         event_list = []
+                        window["-CORRECTIONS-"].update(value=' '.join(event_list))  # Display the event list in the GUI
+
                     # window["-CORRECTIONS-"].update(value=' '.join(event_list))  # Display the event list in the GUI
         else:
             # If the event is not a context event, add it to the event list

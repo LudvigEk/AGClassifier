@@ -29,7 +29,6 @@ def set_correction_yaml_global(path):
 def create_invalid_select_window():
     """
     Warn the user that they have made an invalid selection by selecting more than one button of the same category.
-    TODO: there seems to be a bug where this only fires once?
 
     :return:
     """
@@ -373,7 +372,7 @@ def check_if_in_yaml(sample_name: str, gate_name: str) -> bool:
     """
 
     # test print correction_yaml_file
-    print("correct_yaml_file: ", correction_yaml_file)
+    #print("correct_yaml_file: ", correction_yaml_file)
 
     with open(correction_yaml_file, "r") as in_file:
         yaml_full_dict = yaml.safe_load(in_file)  # Dict of lists
@@ -458,3 +457,20 @@ def create_yaml_string(image_index: str, file_list: list) -> str:
                 if len(gate_descriptors) > 0:
                     descriptors += gate_name + ": " + ", ".join(gate_descriptors) + "\n"
     return descriptors
+
+
+def update_event_descriptor_dict(old_dict: dict, new_values: list) -> dict:
+    """
+    Update the event descriptor dictionary (event_descriptor_dict) with the new values from the GUI.
+    The contents of the three sg.In cells above the custom buttons will be made into descriptors in the dictionary.
+
+    :param old_dict: Old event_descriptor_dict
+    :param new_values: List containing the contents of the three sg.In cells above the custom buttons.
+    :return: Dictionary with the updated values
+    """
+    new_dict = old_dict.copy()
+    new_dict["Custom 1"] = "CUSTOM_"+new_values[0]
+    new_dict["Custom 2"] = "CUSTOM_"+new_values[1]
+    new_dict["Custom 3"] = "CUSTOM_"+new_values[2]
+
+    return new_dict
