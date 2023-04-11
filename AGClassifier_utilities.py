@@ -38,9 +38,9 @@ def create_invalid_select_window():
     invalid_selection_layout = [
         [
             sg.Text(
-                'Invalid selection, too many X- or Y- limits\nYou may only select up to one X-limit and up to one '
-                'Y-limit.\nIt is allowed to select no limit at all for an image, as well as just one X- or Y- '
-                'limit\nand an unlimited amount of custom limits.'),
+                'Invalid selection: more than one correction of the same category were selected.\nYou may only select'
+                ' up to one correction of the same category for a single image.\nThere is no limit for the amount of'
+                ' custom corrections.\nIt is also allowed to select no correction at all for an image.'),
             sg.Button('OK', size=(8, 4))
         ]
     ]
