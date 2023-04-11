@@ -31,7 +31,9 @@ iv_column_2_images = [
 
     [sg.Text(size=(120, 1), key="-INDEX-")],
 
-    [sg.Image(key="-IMAGE-", size=(160, 140)), sg.Image(key="-IMAGE2-", size=(160, 140))],
+    [sg.Image(key="-IMAGE-", size=(160, 140))],
+
+    [sg.Image(key="-IMAGE2-", size=(160, 140))],
 
 ]
 
@@ -50,7 +52,6 @@ iv_column_3_images = [
     [sg.Image(key="-IMAGE2-", size=(160, 140)), sg.Image(key="-IMAGE3-", size=(160, 140))],
 
 ]
-
 # *****************  ***********************
 
 # ***************** extra buttons ***********************

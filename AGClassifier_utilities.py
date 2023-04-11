@@ -60,6 +60,7 @@ def update_image(window_ref, image_index, file_list, page_no=0, sample_in_yaml_s
     :param image_index: index of the PDF file name we want to jump to in the file list
     :param file_list: list of all PDF files to process
     :param page_no: page number of the PDF to jump to. Default is 0. This can be a tuple of page numbers.
+    :param sample_in_yaml_string:
     :return: Updated image index
     """
 
@@ -113,6 +114,13 @@ def update_image(window_ref, image_index, file_list, page_no=0, sample_in_yaml_s
         second_image_page = get_page(second_page, dlist_tab, doc, width=window_x_size, height=window_y_size)
         second_image_data = second_image_page.tobytes("png")
         window_ref["-IMAGE2-"].update(data=second_image_data, size=(window_x_size, window_y_size))
+
+        # If image_index is a tuple of length 3, then load/update the third image as well
+        if len(page_no) == 3:
+            third_page = page_no[2]
+            third_image_page = get_page(third_page, dlist_tab, doc, width=window_x_size, height=window_y_size)
+            third_image_data = third_image_page.tobytes("png")
+            window_ref["-IMAGE3-"].update(data=third_image_data, size=(window_x_size, window_y_size))
 
     # Refresh entire window
     window_ref.refresh()
