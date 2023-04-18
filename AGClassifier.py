@@ -24,15 +24,17 @@ def select_folders():
         # if no folder is selected, make a popup requesting the user to select a folder
         sg.popup("Invalid folder. Please select a valid input folder")
         input_folder = sg.popup_get_folder("Select input folder")
-    output_folder = sg.popup_get_folder("Select the folder where the output should be saved:",
-                                        title="Select output folder")
-    while output_folder is None or output_folder == "":
-        sg.popup("Please select a valid output folder")
-        output_folder = sg.popup_get_folder("Select output folder")
+    #output_folder = sg.popup_get_folder("Select the folder where the output should be saved:",
+    #                                    title="Select output folder")
+    #while output_folder is None or output_folder == "":
+    #    sg.popup("Please select a valid output folder")
+    #    output_folder = sg.popup_get_folder("Select output folder")
 
-    # Global variable correction_yaml_file
-    # Check if it already exists, otherwise touch
-    # Then set the global variable internally
+    # Check if an output folder already exists in the input folder
+    output_folder = os.path.join(input_folder, "output")
+    if not os.path.exists(output_folder):
+        os.mkdir(output_folder)
+    # The file that will store all the output
     correction_yaml_file = os.path.join(output_folder, "correction.yaml")
     set_correction_yaml_global(correction_yaml_file)
 
@@ -52,7 +54,7 @@ def main():
     input_folder, yaml_file = select_folders()
 
     # Then select layout
-    layout, event_descriptor_dict, page_no, gate_name = layout_selector()
+    layout, event_descriptor_dict, page_no, gate_name = layout_selector(input_folder)
 
     # Create the window
     window = sg.Window(title="AliGater image classifier", layout=layout, resizable=True, finalize=True)
