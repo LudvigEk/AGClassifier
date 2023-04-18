@@ -55,7 +55,11 @@ def main():
     layout, event_descriptor_dict, page_no, gate_name = layout_selector()
 
     # Create the window
-    window = sg.Window(title="AliGater image classifier", layout=layout, resizable=True)
+    window = sg.Window(title="AliGater image classifier", layout=layout, resizable=True, finalize=True)
+
+    # Bind arrows to next/previous image
+    window.bind("<Right>", "DONE, next image")
+    window.bind("<Left>", "Previous image")
 
     # Run the event loop
     event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name)

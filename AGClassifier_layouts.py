@@ -61,10 +61,10 @@ extra_buttons_column = [
         sg.Button('Open pdf', pad=(0, 35), size=(16, 4)),
     ],
     [
-        sg.Button('DISCARD', pad=(0, 35), size=(16, 4)),
+        sg.Button("SAMPLE IS WRONG", key='DISCARD', pad=(0, 35), size=(16, 4)),
     ],
     [
-        sg.Button('Set this pop NA', pad=(0, 35), size=(16, 4)),
+        sg.Button('Cannot answer', key='NA', pad=(0, 35), size=(16, 4)),
     ],
 ]
 

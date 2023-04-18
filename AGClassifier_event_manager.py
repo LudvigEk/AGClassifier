@@ -158,7 +158,7 @@ def is_context_event(event) -> bool:
     """
 
     if event in ["START", "DONE, next image", "Previous image", "Exit", "WIN_CLOSED",
-                 "Open pdf", "Set this pop NA", "DISCARD", "-SAMPLENO-"]:
+                 "Open pdf", "NA", "DISCARD", "-SAMPLENO-"]:
         return True
     else:
         return False
@@ -222,7 +222,7 @@ def event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name) 
             elif event == "Exit" or event == "WIN_CLOSED":
                 sys.exit(0)
             else:
-                if event in ["Set this pop NA", "DISCARD"]:
+                if event in ["NA", "DISCARD"]:
                     if event == "DISCARD":
                         user_is_sure = create_discard_are_you_sure_popup()
                         if not user_is_sure:
@@ -231,7 +231,7 @@ def event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name) 
                             add_to_output_yaml(gate_name="DISCARD",
                                                descriptors=['DISCARD'],
                                                sample_id=collect_name_of_pdf_at_index(file_list, image_index))
-                    elif event == "Set this pop NA":
+                    elif event == "NA":
                         # Add the sample to the yaml file under the NA entry for that gate
                         add_to_output_yaml(gate_name=gate_name, descriptors=['NA'],
                                            sample_id=collect_name_of_pdf_at_index(file_list, image_index))
