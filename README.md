@@ -20,12 +20,14 @@ AGClassifier can be started by running the AGClassifier.py script:
 python AGClassifier.py
 ```
 
-The GUI will then open and ask the user to provide three paths:
-1. The path to the folder containing the images to be classified.
-2. The path to the folder where the classified images should be saved.
-3. The path where the layout 'pickle' file is located. This file is specific to the gate that is being evaluated.
+The GUI will then open and ask the user to provide path to the folder containing the images to be classified.
+The program will create an 'output' folder in the same directory as the images. This is where the output .yaml file
+will be created.
+Finally, AGClassifier will also attempt to automatically file the .pickle file that contains the layout of the gate.
+If a single .pickle file exists in the parent directory of the images folder, that file will be used automatically.
+If no file is found or there are several, the user will be asked to select a file.
 
-Once these three have been provided, the fun begins!
+Once the paths are defined, the fun begins!
 The main window will open next. This is where the images are displayed. The user can then use the buttons to either
 approve the image or select the necessary corrections.
 
