@@ -23,7 +23,7 @@ python AGClassifier.py
 The GUI will then open and ask the user to provide path to the folder containing the images to be classified.
 The program will create an 'output' folder in the same directory as the images. This is where the output .yaml file
 will be created.
-Finally, AGClassifier will also attempt to automatically file the .pickle file that contains the layout of the gate.
+Finally, AGClassifier will also attempt to automatically find the .pickle file that contains the layout particular to the gate.
 If a single .pickle file exists in the parent directory of the images folder, that file will be used automatically.
 If no file is found or there are several, the user will be asked to select a file.
 
