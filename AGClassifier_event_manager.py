@@ -7,7 +7,7 @@ import PySimpleGUI as sg
 from AGClassifier_utilities import create_invalid_select_window, create_pdf_window, update_image, add_to_output_yaml, \
     collect_name_of_pdf_at_index, check_if_discarded, create_complete_window, check_if_in_yaml, remove_from_yaml, \
     create_discard_are_you_sure_popup, create_yaml_string, post_window_warning, update_event_descriptor_dict, \
-    bind_arrows, unbind_arrows
+    bind_arrows, unbind_arrows, create_clear_sample_corrections_are_you_sure_popup
 
 
 def check_event_categories(in_event_list, event_descriptor_dict) -> bool:
@@ -159,7 +159,7 @@ def is_context_event(event) -> bool:
     """
 
     if event in ["START", "DONE, next image", "Previous image", "Exit", "WIN_CLOSED",
-                 "Open pdf", "NA", "DISCARD", "-SAMPLENO-", "-BINDARROWS-"]:
+                 "Open pdf", "NA", "DISCARD", "-SAMPLENO-", "-BINDARROWS-", "-CLEARFROMYAML-"]:
         return True
     else:
         return False
@@ -222,13 +222,16 @@ def event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name) 
                         image_index = old_image_index
                         values["-SAMPLENO-"] = image_index
             elif event == "-BINDARROWS-":  # Bind/unbind the arrow keys to the buttons, depending on the checkbox
-                print(f"Checkbox clicked, values: {values}")
                 if not values["-BINDARROWS-"]:  # If the checkbox is not checked, unbind the arrows
                     unbind_arrows(window)
-                    print("UNBINDED")
                 else:
                     bind_arrows(window)
-                    print("BINDED")
+            elif event == "-CLEARFROMYAML-":  # Remove all entries regarding current sample from yaml file
+                user_is_sure = create_clear_sample_corrections_are_you_sure_popup()
+                if not user_is_sure:
+                    pass
+                else:
+                    remove_from_yaml(sample_name, gate_name)
             elif event == "Exit" or event == "WIN_CLOSED":
                 sys.exit(0)
             else:

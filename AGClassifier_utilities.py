@@ -433,6 +433,24 @@ def create_discard_are_you_sure_popup() -> bool:
         return False
 
 
+def create_clear_sample_corrections_are_you_sure_popup() -> bool:
+    """
+    Create a PySimpleGUI popup to confirm the user wants to discard the current sample.
+
+    :return:
+    """
+
+    layout = [[sg.Text("This will remove the previously saved corrections for this sample. Are you sure?")],
+              [sg.Button("Yes"), sg.Button("No")]]
+    window = sg.Window("Clear sample corrections", layout)
+    event, values = window.read()
+    window.close()
+    if event == "Yes":
+        return True
+    else:
+        return False
+
+
 def post_window_warning(window_ref, warning_string: str) -> str:
     """
     Takes a string and pushes that to the window ref, without any other changes

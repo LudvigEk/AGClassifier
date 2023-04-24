@@ -87,6 +87,9 @@ bottom_layout = [
     ],
     [
         sg.Checkbox("Bind arrow keys to navigation", key="-BINDARROWS-", default=False, enable_events=True),
+    ],
+    [
+        sg.Button('Remove stored corrections', key="-CLEARFROMYAML-", size=(16, 4)),
     ]
 ]
 
