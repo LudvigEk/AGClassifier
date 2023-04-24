@@ -84,6 +84,9 @@ bottom_layout = [
     ],
     [
         sg.Button('Previous image', size=(60, 4)),
+    ],
+    [
+        sg.Checkbox("Bind arrow keys to navigation", key="-BINDARROWS-", default=False, enable_events=True),
     ]
 ]
 

@@ -380,7 +380,7 @@ def check_if_in_yaml(sample_name: str, gate_name: str) -> bool:
     """
 
     # test print correction_yaml_file
-    #print("correct_yaml_file: ", correction_yaml_file)
+    # print("correct_yaml_file: ", correction_yaml_file)
 
     with open(correction_yaml_file, "r") as in_file:
         yaml_full_dict = yaml.safe_load(in_file)  # Dict of lists
@@ -477,8 +477,32 @@ def update_event_descriptor_dict(old_dict: dict, new_values: list) -> dict:
     :return: Dictionary with the updated values
     """
     new_dict = old_dict.copy()
-    new_dict["Custom 1"] = "CUSTOM_"+new_values[0]
-    new_dict["Custom 2"] = "CUSTOM_"+new_values[1]
-    new_dict["Custom 3"] = "CUSTOM_"+new_values[2]
+    new_dict["Custom 1"] = "CUSTOM_" + new_values[0]
+    new_dict["Custom 2"] = "CUSTOM_" + new_values[1]
+    new_dict["Custom 3"] = "CUSTOM_" + new_values[2]
 
     return new_dict
+
+
+def bind_arrows(window_ref):
+    """
+    Bind the left and right arrow keys to the DONE and Previous buttons.
+    :param window:
+    :return:
+    """
+    window_ref.bind("<Right>", "DONE, next image")
+    window_ref.bind("<Left>", "Previous image")
+
+
+def unbind_arrows(window_ref):
+    """
+    Unbind the left and right arrow keys from the DONE and Previous buttons.
+    :param window:
+    :return:
+    """
+    try:
+        window_ref.unbind("<Right>")
+        window_ref.unbind("<Left>")
+    except AttributeError:
+        print("Could not unbind arrows because this version of PySimpleGUI does not not have the 'unbind' method for"
+              " a window. See https://github.com/PySimpleGUI/PySimpleGUI/issues/5300#issuecomment-1140442135")

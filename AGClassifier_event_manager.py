@@ -6,7 +6,8 @@ import PySimpleGUI as sg
 
 from AGClassifier_utilities import create_invalid_select_window, create_pdf_window, update_image, add_to_output_yaml, \
     collect_name_of_pdf_at_index, check_if_discarded, create_complete_window, check_if_in_yaml, remove_from_yaml, \
-    create_discard_are_you_sure_popup, create_yaml_string, post_window_warning, update_event_descriptor_dict
+    create_discard_are_you_sure_popup, create_yaml_string, post_window_warning, update_event_descriptor_dict, \
+    bind_arrows, unbind_arrows
 
 
 def check_event_categories(in_event_list, event_descriptor_dict) -> bool:
@@ -158,7 +159,7 @@ def is_context_event(event) -> bool:
     """
 
     if event in ["START", "DONE, next image", "Previous image", "Exit", "WIN_CLOSED",
-                 "Open pdf", "NA", "DISCARD", "-SAMPLENO-"]:
+                 "Open pdf", "NA", "DISCARD", "-SAMPLENO-", "-BINDARROWS-"]:
         return True
     else:
         return False
@@ -190,7 +191,8 @@ def event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name) 
     while bOk:
 
         event, values = window.read()
-
+        print("EVENT: ", event)
+        print("VALUES: ", values)
         sample_name = collect_name_of_pdf_at_index(file_list, image_index)
         sample_in_yaml = check_if_in_yaml(sample_name, gate_name)  # Flag used to 'correct' if new limits
         if sample_in_yaml:
@@ -198,7 +200,7 @@ def event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name) 
         else:
             post_window_warning(window, "")
 
-        # First check for context events (start, exit, previous, discard, set to na, open pdf)
+        # First check for context events (start, exit, previous, bind checkbox, discard, set to na, open pdf)
         if is_context_event(event):
             # The open pdf event is a special case, it does not clear the event list
             if event == 'Open pdf':
@@ -219,6 +221,14 @@ def event_loop(window, input_folder, event_descriptor_dict, page_no, gate_name) 
                         # Out of bounds, use old value
                         image_index = old_image_index
                         values["-SAMPLENO-"] = image_index
+            elif event == "-BINDARROWS-":  # Bind/unbind the arrow keys to the buttons, depending on the checkbox
+                print(f"Checkbox clicked, values: {values}")
+                if not values["-BINDARROWS-"]:  # If the checkbox is not checked, unbind the arrows
+                    unbind_arrows(window)
+                    print("UNBINDED")
+                else:
+                    bind_arrows(window)
+                    print("BINDED")
             elif event == "Exit" or event == "WIN_CLOSED":
                 sys.exit(0)
             else:
