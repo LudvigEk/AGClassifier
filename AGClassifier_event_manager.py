@@ -30,7 +30,15 @@ def check_event_categories(in_event_list, event_descriptor_dict) -> bool:
     # Collect the event categories of the remaining events
     event_categories = []
     for event in event_list:
-        event_category = event_descriptor_dict[event].split("_")[0]
+        if '_' in event_descriptor_dict[event]:
+            event_category = event_descriptor_dict[event].split("_")[0]
+        elif ' ' in event_descriptor_dict[event]:
+            event_category = event_descriptor_dict[event].split(" ")[0]
+            sys.stderr.write("WARNING: Event descriptor does not contain underscores. Splitting by space instead.")
+        else:
+            event_category = event_descriptor_dict[event]
+            sys.stderr.write("WARNING: Event descriptor does not contain underscores or spaces. Full descriptor will be"
+                             " used as event category.")
         if event_category not in event_categories:
             event_categories.append(event_category)
     event_categories = set(event_categories)
