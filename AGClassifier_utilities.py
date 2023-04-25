@@ -103,7 +103,7 @@ def update_image(window_ref, image_index, file_list, page_no=0, sample_in_yaml_s
 
     pixmap = get_page(cur_page, dlist_tab, doc, width=window_x_size, height=window_y_size)  # show page 1 for start
     data = pixmap.tobytes("png")
-    window_ref["-IMAGE-"].update(data=data, size=(window_x_size, window_y_size))
+    window_ref["-IMAGE-"].update(data=data, size=(int(window_x_size), int(window_y_size)))
 
     # Show list of which gates this sample has been classified as in the yaml
     window_ref["-INDEX-"].update(sample_in_yaml_string)
@@ -519,8 +519,8 @@ def unbind_arrows(window_ref):
     :return:
     """
     try:
-        window_ref.unbind("<Right>")
-        window_ref.unbind("<Left>")
+        window_ref.TKroot.unbind("<Right>")
+        window_ref.TKroot.unbind("<Left>")
     except AttributeError:
-        print("Could not unbind arrows because this version of PySimpleGUI does not not have the 'unbind' method for"
-              " a window. See https://github.com/PySimpleGUI/PySimpleGUI/issues/5300#issuecomment-1140442135")
+        print("WARNING: It was not possible to unbind key arrows."
+              "See https://github.com/PySimpleGUI/PySimpleGUI/issues/5300#issuecomment-1140442135")
