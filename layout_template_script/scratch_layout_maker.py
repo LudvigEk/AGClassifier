@@ -25,15 +25,15 @@ variable_layout = [
     [
         sg.Text("Custom 1:", justification='right'),
 
-        sg.In(size=(15, 1), enable_events=True, default_text=0, key="-CUSTOM1-"),
+        sg.In(size=(15, 1), enable_events=False, default_text=0, key="-CUSTOM1-"),
 
         sg.Text("Custom 2:", justification='right'),
 
-        sg.In(size=(15, 1), enable_events=True, default_text=0, key="-CUSTOM2-"),
+        sg.In(size=(15, 1), enable_events=False, default_text=0, key="-CUSTOM2-"),
 
         sg.Text("Custom 3:", justification='right'),
 
-        sg.In(size=(15, 1), enable_events=True, default_text=0, key="-CUSTOM3-"),
+        sg.In(size=(15, 1), enable_events=False, default_text=0, key="-CUSTOM3-"),
     ],
     [
         sg.Button('Custom 1', size=(16, 4), pad=(35, 0)),
