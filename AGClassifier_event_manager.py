@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import sys
 from glob import glob
-import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 
 from AGClassifier_utilities import create_invalid_select_window, create_pdf_window, update_image, add_to_output_yaml, \
     collect_name_of_pdf_at_index, check_if_discarded, create_complete_window, check_if_in_yaml, remove_from_yaml, \

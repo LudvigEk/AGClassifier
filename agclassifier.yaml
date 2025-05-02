@@ -1,10 +1,10 @@
-name: agclassifier
+#name: agclassifier
 
 dependencies:
   - python=3.10
   - pyyaml
   - pip  
   - pip:
-    - pysimplegui
+    - FreeSimpleGUI==5.1.0
     - pymupdf
 

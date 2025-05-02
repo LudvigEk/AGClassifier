@@ -5,7 +5,7 @@ import fitz
 import os
 import sys
 import yaml
-import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 
 # Global variable correction_yaml_file, gets set by AGClassifier on selecting output folder
 # All functions that need this filepath/global variable are in AGClassifier_utilities.py

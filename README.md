@@ -9,7 +9,7 @@ dependencies. The following commands will create a conda virtual environment wit
 it:
 
 ```bash
-conda create --file agclassifier.yaml -y
+conda env create --file agclassifier.yaml -n agclassifier
 conda activate agclassifier
 ```
 

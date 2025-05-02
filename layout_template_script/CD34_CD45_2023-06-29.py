@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 import pickle
-import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 
 variable_layout = [
     [
         sg.Text("Currently selected corrections are: "),
         sg.Text("", key="-CORRECTIONS-"),
+    ],
+    [
+        sg.Button('CD45y 10^3', size=(12, 4)),
+        sg.Button('CD45y 20^3', size=(12, 4)),
+        sg.Button('CD45y 30^3', size=(12, 4))
     ],
     [
         sg.Button('CD34x 10^3', size=(12, 4)),
@@ -51,7 +56,10 @@ if __name__ == "__main__":
     # Only one event per category can be selected at a time, i.e. if the user selects
     # two Xlim_ events, a popup will appear telling them to select only one
     # multiple CUSTOM_ events can be selected at the same time
-    event_descriptor_dict = {"CD34x 10^3": "CD34x_10^3",
+    event_descriptor_dict = {"CD45y 10^3": "CD45y_10^3",
+                             "CD45y 20^3": "CD45y_20^3",
+                             "CD45y 30^3": "CD45y_30^3",
+                             "CD34x 10^3": "CD34x_10^3",
                              "CD34x 20^3": "CD34x_20^3",
                              "CD34x 40^3": "CD34x_40^3",
                              "CD34x 70^3": "CD34x_70^3",
@@ -71,14 +79,14 @@ if __name__ == "__main__":
                             "event_descriptor_dict": event_descriptor_dict}
 
     # pickle the dict to file
-    with open("../cd45_cd34_v4.pickle", "wb") as f:
+    with open("../cd45_cd34_v6.pickle", "wb") as f:
         pickle.dump(variable_layout_dict, f)
 
     # clear the dict
     variable_layout_dict = {}
 
     # Read the dict from file and print it to test
-    with open("../cd45_cd34_v4.pickle", "rb") as f:
+    with open("../cd45_cd34_v6.pickle", "rb") as f:
         variable_layout_dict = pickle.load(f)
         # print
         print(variable_layout_dict)

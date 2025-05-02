@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 import pickle
 import sys
 import os
